@@ -1,0 +1,35 @@
+"use client";
+
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+
+export function CookieBanner() {
+  const t = useTranslations("cookieBanner");
+  const [choice, setChoice] = React.useState<string | null | undefined>(undefined);
+
+  React.useEffect(() => {
+    window.requestAnimationFrame(() => {
+      setChoice(window.localStorage.getItem("haru-cookie-choice"));
+    });
+  }, []);
+
+  const save = (value: "necessary" | "all") => {
+    window.localStorage.setItem("haru-cookie-choice", value);
+    setChoice(value);
+  };
+
+  if (choice !== null) return null;
+
+  return (
+    <div className="haru-glow-card fixed inset-x-4 bottom-24 z-50 mx-auto w-[calc(100%-2rem)] min-w-0 max-w-3xl rounded-[1.35rem] p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">{t("text")}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => save("necessary")}>{t("reject")}</Button>
+          <Button onClick={() => save("all")}>{t("accept")}</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
