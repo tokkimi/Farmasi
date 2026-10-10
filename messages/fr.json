@@ -129,7 +129,7 @@
     "decoderTitle": "Décoder un produit, avant de l’ajouter.",
     "decoderText": "Cherche un produit pour voir sa composition, son origine et son mode d’emploi.",
     "decoderScan": "Scanner un produit",
-    "decoderPlaceholder": "Ex. COSRX Snail 96 ou Beauty of Joseon",
+    "decoderPlaceholder": "Ex. Creamy Lipstick ou Resurface Serum",
     "decoderAction": "Décoder",
     "decoderHint": "Un achat en vue ? Haru explique le produit et le compare à ta routine.",
     "decoderMissing": "Ce produit n’est pas encore dans le catalogue. Cherche sa fiche officielle en ligne.",
@@ -553,7 +553,7 @@
     "shelfConflictOk": "Aucun conflit avec votre routine actuelle.",
     "ocrDisclaimer": "La lecture d'étiquette peut mal interpréter les petits caractères — vérifie sur le flacon avant de changer ta routine.",
     "searchLabel": "Code-barres, marque ou nom du produit",
-    "searchPlaceholder": "Ex : COSRX Snail Essence, 880...",
+    "searchPlaceholder": "Ex : Matte Liquid Lipstick, Infinilash…",
     "searchCta": "Chercher"
   },
   "productsPage": {
@@ -1901,7 +1901,7 @@
     "decoderTitle": "Décoder un produit, avant de l’ajouter.",
     "decoderText": "Cherche un produit pour voir sa composition, son origine et son mode d’emploi.",
     "decoderScan": "Scanner un produit",
-    "decoderPlaceholder": "Ex. COSRX Snail 96 ou Beauty of Joseon",
+    "decoderPlaceholder": "Ex. Creamy Lipstick ou Resurface Serum",
     "decoderAction": "Décoder",
     "decoderHint": "Un achat en vue ? Haru explique le produit et le compare à ta routine.",
     "decoderMissing": "Ce produit n’est pas encore dans le catalogue. Cherche sa fiche officielle en ligne.",
@@ -1944,7 +1944,7 @@
     "starting": "Préparation…",
     "cameraDenied": "L'accès à la caméra a été refusé. Autorisez-le dans les réglages de votre navigateur puis réessayez.",
     "cameraError": "Impossible de démarrer la caméra sur cet appareil.",
-    "faceFound": "Visage détecté",
+    "faceFound": "Toutes les zones sont détectées",
     "noFace": "Placez votre visage face à la caméra",
     "compare": "Maintenir : avant",
     "reset": "Tout retirer",
@@ -1955,7 +1955,18 @@
     "addToRoutine": "Ajouter à ma routine",
     "inRoutine": "Dans ma routine",
     "privacy": "L'image reste sur votre appareil : rien n'est enregistré ni envoyé. Le rendu des teintes est une simulation indicative.",
-    "tryCta": "Essayer en direct"
+    "tryCta": "Essayer en direct",
+    "zones": {
+      "lips": "Lèvres",
+      "cheeks": "Joues",
+      "eyes": "Paupières",
+      "brows": "Sourcils",
+      "complexion": "Teint"
+    },
+    "takePhoto": "Prendre la photo",
+    "savePhoto": "Enregistrer",
+    "backToCamera": "Retour caméra",
+    "photoAlt": "Votre look maquillage"
   },
   "beautyRoutine": {
     "title": "Ma routine beauté",

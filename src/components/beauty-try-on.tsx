@@ -2,13 +2,16 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Camera, CameraOff, Check, Eye, EyeOff, Heart, Plus, RotateCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { Camera, CameraOff, Check, Download, Eye, EyeOff, Heart, Loader2, Plus, RotateCcw, ShieldCheck } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCatalog, useShelf } from "@/lib/shelf-store";
 import { FARMASI_TRY_ON_PRODUCTS, type FarmasiProduct, type TryOnArea } from "@/lib/seed-data/farmasi-catalog";
 import { useBeautyFavorites } from "@/lib/beauty-favorites";
+import { FaceGuideOverlay } from "@/components/face-guide-overlay";
+import { smoothLandmarks, validateFacePosition } from "@/lib/face-mesh/faceMesh.utils";
+import type { FaceLandmarkPoint, FacePositionInstruction } from "@/lib/face-mesh/faceMesh.types";
 import { cn } from "@/lib/utils";
 
 type Point = { x: number; y: number };
@@ -248,23 +251,38 @@ function parseLook(raw?: string): Look {
   return look;
 }
 
+const ZONE_CHIPS: Array<{ key: string; areas: TryOnArea[] }> = [
+  { key: "lips", areas: ["lips", "lipGloss", "lipLiner"] },
+  { key: "cheeks", areas: ["cheeks", "contour", "highlight"] },
+  { key: "eyes", areas: ["eyeshadow", "eyeliner", "lashes"] },
+  { key: "brows", areas: ["brows"] },
+  { key: "complexion", areas: ["complexion"] },
+];
+
 export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string; initialLook?: string }) {
   const t = useTranslations("tryOn");
+  const tPosition = useTranslations("faceScanPage.position");
   const tCategories = useTranslations("categories");
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const landmarkerRef = React.useRef<VideoLandmarker | null>(null);
   const frameRef = React.useRef<number | null>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
+  const smoothedRef = React.useRef<FaceLandmarkPoint[] | null>(null);
+  const stableSinceRef = React.useRef<number | null>(null);
   const lookRef = React.useRef<Look>({});
   const intensityRef = React.useRef(0.85);
   const compareRef = React.useRef(false);
 
-  const parsedLook = parseLook(initialLook);
+  const parsedLook = React.useMemo(() => parseLook(initialLook), [initialLook]);
   const firstLookSlug = Object.values(parsedLook)[0]?.slug;
   const initialProduct = FARMASI_TRY_ON_PRODUCTS.find((p) => p.slug === (initialSlug ?? firstLookSlug));
-  const [status, setStatus] = React.useState<"idle" | "starting" | "live" | "denied" | "error">("idle");
+
+  const [status, setStatus] = React.useState<"loading" | "live" | "denied" | "error">("loading");
+  const [instruction, setInstruction] = React.useState<FacePositionInstruction>("holdStill");
+  const [progress, setProgress] = React.useState(0);
   const [faceFound, setFaceFound] = React.useState(false);
+  const [photo, setPhoto] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState(
     initialProduct?.category === "lip-care" ? "lip-makeup" : (initialProduct?.category ?? "lip-makeup")
   );
@@ -304,17 +322,22 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
     landmarkerRef.current = null;
   }, []);
 
-  React.useEffect(() => stop, [stop]);
-
-  const start = async () => {
-    setStatus("starting");
+  const start = React.useCallback(async () => {
+    stop();
+    setStatus("loading");
+    setInstruction("holdStill");
+    setProgress(0);
+    smoothedRef.current = null;
+    stableSinceRef.current = null;
     try {
+      // Same camera setup as the Haru skin scanner (front camera, portrait).
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 960 } },
+        video: { facingMode: "user", width: { ideal: 960 }, height: { ideal: 1280 } },
         audio: false,
       });
       streamRef.current = stream;
-      const video = videoRef.current!;
+      const video = videoRef.current;
+      if (!video) throw new Error("missing_video");
       video.srcObject = stream;
       await video.play();
 
@@ -323,7 +346,10 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
       const options = (delegate: "GPU" | "CPU") => ({
         baseOptions: { modelAssetPath: "/face-model/face_landmarker.task", delegate },
         runningMode: "VIDEO" as const,
-        numFaces: 1,
+        numFaces: 2,
+        minFaceDetectionConfidence: 0.55,
+        minFacePresenceConfidence: 0.55,
+        minTrackingConfidence: 0.55,
       });
       try {
         landmarkerRef.current = (await FaceLandmarker.createFromOptions(vision, options("GPU"))) as unknown as VideoLandmarker;
@@ -331,54 +357,75 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
         landmarkerRef.current = (await FaceLandmarker.createFromOptions(vision, options("CPU"))) as unknown as VideoLandmarker;
       }
       setStatus("live");
-      loop();
+
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+      let lastInference = 0;
+      let lastFound = false;
+      const render = (time: number) => {
+        const currentVideo = videoRef.current;
+        const landmarker = landmarkerRef.current;
+        if (!currentVideo || !landmarker) return;
+        const w = currentVideo.videoWidth;
+        const h = currentVideo.videoHeight;
+        if (w && h && currentVideo.readyState >= 2 && document.visibilityState !== "hidden") {
+          if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+          }
+          // Detect at the scanner's cadence (~15 fps), draw at full frame rate.
+          if (time - lastInference >= 50) {
+            lastInference = time;
+            const result = landmarker.detectForVideo(currentVideo, performance.now());
+            const faceCount = result.faceLandmarks?.length ?? 0;
+            const raw = result.faceLandmarks?.[0] ?? null;
+            const next = raw ? smoothLandmarks(smoothedRef.current, raw, 0.55) : null;
+            smoothedRef.current = next;
+            const preliminary = validateFacePosition(next, faceCount, stableSinceRef.current, time);
+            if (preliminary.instruction !== "faceDetected") stableSinceRef.current = null;
+            else if (!stableSinceRef.current) stableSinceRef.current = time;
+            const stable = validateFacePosition(next, faceCount, stableSinceRef.current, time);
+            setInstruction(stable.instruction);
+            setProgress(stable.progress);
+            const found = Boolean(next) && faceCount === 1;
+            if (found !== lastFound) {
+              lastFound = found;
+              setFaceFound(found);
+            }
+          }
+          ctx.save();
+          ctx.setTransform(-1, 0, 0, 1, w, 0); // selfie mirror, like the scanner preview
+          ctx.drawImage(currentVideo, 0, 0, w, h);
+          const lm = smoothedRef.current;
+          if (lm && lastFound && !compareRef.current) {
+            drawLook(ctx, lm.map((pt) => ({ x: pt.x * w, y: pt.y * h })), lookRef.current, intensityRef.current, 1);
+          }
+          ctx.restore();
+        }
+        frameRef.current = requestAnimationFrame(render);
+      };
+      frameRef.current = requestAnimationFrame(render);
     } catch (error) {
       stop();
       const name = (error as { name?: string })?.name;
       setStatus(name === "NotAllowedError" || name === "SecurityError" ? "denied" : "error");
     }
-  };
+  }, [stop]);
 
-  const loop = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const landmarker = landmarkerRef.current;
-    if (!video || !canvas || !landmarker) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let lastFound = false;
-    const render = () => {
-      const w = video.videoWidth;
-      const h = video.videoHeight;
-      if (w && h) {
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-        }
-        ctx.save();
-        ctx.setTransform(-1, 0, 0, 1, w, 0); // selfie mirror
-        ctx.drawImage(video, 0, 0, w, h);
-        let found = false;
-        if (!compareRef.current) {
-          const result = landmarker.detectForVideo(video, performance.now());
-          const raw = result.faceLandmarks?.[0];
-          if (raw?.length) {
-            found = true;
-            drawLook(ctx, raw.map((pt) => ({ x: pt.x * w, y: pt.y * h })), lookRef.current, intensityRef.current, 1);
-          }
-        } else {
-          found = lastFound;
-        }
-        ctx.restore();
-        if (found !== lastFound) {
-          lastFound = found;
-          setFaceFound(found);
-        }
-      }
-      frameRef.current = requestAnimationFrame(render);
+  // The camera opens on arrival and stays open, exactly like the skin scanner.
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => void start(), 0);
+    return () => {
+      window.clearTimeout(timer);
+      stop();
     };
-    render();
+  }, [start, stop]);
+
+  const takePhoto = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || status !== "live") return;
+    setPhoto(canvas.toDataURL("image/jpeg", 0.92));
   };
 
   const products = FARMASI_TRY_ON_PRODUCTS.filter((p) => p.category === tab || (tab === "lip-makeup" && p.category === "lip-care"));
@@ -388,6 +435,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
   const dbProduct = catalog.find((p) => p.slug === active?.slug);
   const inShelf = Boolean(dbProduct && shelf.some((p) => p.id === dbProduct.id));
   const appliedCount = Object.keys(look).length;
+  const aligned = faceFound && instruction === "faceDetected";
 
   const chooseShade = (product: FarmasiProduct, shade: number) => {
     if (!product.tryOn) return;
@@ -409,56 +457,123 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
         <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <Card className="relative gap-0 overflow-hidden p-0">
-        <div className="relative aspect-[3/4] w-full bg-black">
-          <video ref={videoRef} playsInline muted className="hidden" />
-          <canvas ref={canvasRef} className={cn("absolute inset-0 h-full w-full object-cover", status !== "live" && "hidden")} />
-          {status !== "live" && (
+      <div className="w-full overflow-hidden rounded-[1.75rem] border border-white/35 bg-black/20 shadow-[0_26px_80px_-50px_rgba(0,0,0,0.7)]">
+        <div className="relative h-[min(62svh,640px)] min-h-[360px] w-full bg-black">
+          <video ref={videoRef} muted playsInline className="absolute inset-0 size-full scale-x-[-1] object-cover opacity-0" />
+          <canvas ref={canvasRef} className="absolute inset-0 size-full object-cover" />
+
+          {(status === "denied" || status === "error") && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-              {status === "denied" || status === "error" ? (
-                <CameraOff className="size-10 text-muted-foreground" />
-              ) : (
-                <Sparkles className="size-10 text-primary" />
-              )}
-              <p className="max-w-xs text-sm text-muted-foreground">
-                {status === "denied" ? t("cameraDenied") : status === "error" ? t("cameraError") : t("intro")}
-              </p>
-              <Button onClick={start} disabled={status === "starting"} size="lg" className="rounded-full">
+              <CameraOff className="size-10 text-muted-foreground" />
+              <p className="max-w-xs text-sm text-muted-foreground">{status === "denied" ? t("cameraDenied") : t("cameraError")}</p>
+              <Button onClick={() => void start()} size="lg" className="rounded-full">
                 <Camera className="size-4" />
-                {status === "starting" ? t("starting") : t("start")}
+                {t("start")}
               </Button>
             </div>
           )}
-          {status === "live" && (
+
+          {status !== "denied" && status !== "error" && (
             <>
-              <div className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-xs text-white backdrop-blur">
-                {faceFound ? t("faceFound") : t("noFace")}
+              {!aligned && <FaceGuideOverlay active={progress >= 0.2} />}
+              <div className="absolute inset-x-5 top-4 h-1 rounded-full bg-white/18">
+                <span
+                  className="block h-full rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.9)] transition-all"
+                  style={{ width: `${Math.max(4, (faceFound ? Math.max(progress, 0.35) : 0) * 100)}%` }}
+                />
               </div>
-              <button
-                type="button"
-                onPointerDown={() => setCompare(true)}
-                onPointerUp={() => setCompare(false)}
-                onPointerLeave={() => setCompare(false)}
-                onContextMenu={(e) => e.preventDefault()}
-                className="absolute right-3 top-3 flex select-none items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs text-white backdrop-blur [-webkit-touch-callout:none]"
-              >
-                {compare ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                {t("compare")}
-              </button>
-              {appliedCount > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setLook({})}
-                  className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1 text-xs text-white backdrop-blur"
-                >
-                  <RotateCcw className="size-3.5" />
-                  {t("reset")}
-                </button>
-              )}
+
+              <div className="absolute inset-x-3 top-8 flex flex-wrap justify-center gap-1.5">
+                {ZONE_CHIPS.map((zone) => {
+                  const applied = zone.areas.some((area) => look[area]);
+                  return (
+                    <span
+                      key={zone.key}
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur-md transition",
+                        faceFound ? "border-white/55 bg-black/30 text-white" : "border-white/20 bg-black/15 text-white/45"
+                      )}
+                    >
+                      {faceFound ? <Check className="size-3" /> : <span className="size-1.5 rounded-full bg-white/40" />}
+                      {t(`zones.${zone.key}`)}
+                      {applied && <span className="ml-0.5 size-1.5 rounded-full bg-primary" />}
+                    </span>
+                  );
+                })}
+              </div>
+
+              <div className="absolute inset-x-4 bottom-4 flex flex-col items-center gap-2">
+                <div className="max-w-[86vw] rounded-full border border-white/45 bg-black/18 px-4 py-2 text-center text-xs font-medium text-white backdrop-blur-md sm:text-sm">
+                  {status === "loading" ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="size-4 animate-spin" />
+                      {tPosition("holdStill")}
+                    </span>
+                  ) : aligned ? (
+                    t("faceFound")
+                  ) : (
+                    tPosition(instruction)
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onPointerDown={() => setCompare(true)}
+                    onPointerUp={() => setCompare(false)}
+                    onPointerLeave={() => setCompare(false)}
+                    onPointerCancel={() => setCompare(false)}
+                    onContextMenu={(e) => e.preventDefault()}
+                    aria-label={t("compare")}
+                    className="flex size-11 select-none items-center justify-center rounded-full border border-white/50 bg-black/25 text-white backdrop-blur-md [-webkit-touch-callout:none]"
+                  >
+                    {compare ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={takePhoto}
+                    disabled={status !== "live"}
+                    aria-label={t("takePhoto")}
+                    className={cn(
+                      "flex size-14 items-center justify-center rounded-full border border-white/70 bg-white/10 text-white backdrop-blur-md transition sm:size-16",
+                      faceFound ? "shadow-[0_0_28px_rgba(255,255,255,0.8)] hover:bg-white/20" : "opacity-45"
+                    )}
+                  >
+                    <Camera className="size-6 sm:size-7" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLook({})}
+                    disabled={appliedCount === 0}
+                    aria-label={t("reset")}
+                    className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/25 text-white backdrop-blur-md disabled:opacity-40"
+                  >
+                    <RotateCcw className="size-4" />
+                  </button>
+                </div>
+              </div>
             </>
           )}
+
+          {photo && (
+            <div className="absolute inset-0 z-10 flex flex-col bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo} alt={t("photoAlt")} className="min-h-0 flex-1 object-cover" />
+              <div className="flex items-center justify-center gap-2 p-3">
+                <Button asChild size="sm" className="rounded-full">
+                  <a href={photo} download="haru-farmasi-look.jpg">
+                    <Download className="size-4" />
+                    {t("savePhoto")}
+                  </a>
+                </Button>
+                <Button size="sm" variant="outline" className="rounded-full" onClick={() => setPhoto(null)}>
+                  <Camera className="size-4" />
+                  {t("backToCamera")}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      </Card>
+      </div>
 
       <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
         {CATEGORY_TABS.map((item) => (
@@ -506,7 +621,8 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             <div className="min-w-0">
               <p className="truncate font-semibold">{active.name}</p>
               <p className="text-xs text-muted-foreground">
-                {active.brand} · {active.size} · {active.price != null ? `${active.price.toFixed(2).replace(".", ",")} €` : ""}
+                {active.brand} · {active.size}
+                {active.price != null ? ` · ${active.price.toFixed(2).replace(".", ",")} €` : ""}
               </p>
             </div>
             <button

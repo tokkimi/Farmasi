@@ -129,7 +129,7 @@
     "decoderTitle": "Decode a product before adding it.",
     "decoderText": "Search a product to see its ingredients, origin and how to use it.",
     "decoderScan": "Scan a product",
-    "decoderPlaceholder": "e.g. COSRX Snail 96 or Beauty of Joseon",
+    "decoderPlaceholder": "e.g. Creamy Lipstick or Resurface Serum",
     "decoderAction": "Decode",
     "decoderHint": "Considering a purchase? Haru explains the product and compares it with your routine.",
     "decoderMissing": "This product is not in the catalogue yet. Search online for its official page.",
@@ -553,7 +553,7 @@
     "shelfConflictOk": "No conflicts with your current routine.",
     "ocrDisclaimer": "Label reading can misread small print — double-check against the actual bottle before changing your routine.",
     "searchLabel": "Barcode, brand or product name",
-    "searchPlaceholder": "Ex: COSRX Snail Essence, 880...",
+    "searchPlaceholder": "e.g. Matte Liquid Lipstick, Infinilash…",
     "searchCta": "Search"
   },
   "productsPage": {
@@ -1898,7 +1898,7 @@
     "decoderTitle": "Decode a product before adding it.",
     "decoderText": "Search a product to see its ingredients, origin and how to use it.",
     "decoderScan": "Scan a product",
-    "decoderPlaceholder": "e.g. COSRX Snail 96 or Beauty of Joseon",
+    "decoderPlaceholder": "e.g. Creamy Lipstick or Resurface Serum",
     "decoderAction": "Decode",
     "decoderHint": "Considering a purchase? Haru explains the product and compares it with your routine.",
     "decoderMissing": "This product is not in the catalogue yet. Search online for its official page.",
@@ -1941,7 +1941,7 @@
     "starting": "Getting ready…",
     "cameraDenied": "Camera access was denied. Allow it in your browser settings and try again.",
     "cameraError": "The camera couldn't start on this device.",
-    "faceFound": "Face detected",
+    "faceFound": "Every zone is detected",
     "noFace": "Face the camera",
     "compare": "Hold: before",
     "reset": "Remove all",
@@ -1952,7 +1952,18 @@
     "addToRoutine": "Add to my routine",
     "inRoutine": "In my routine",
     "privacy": "The image stays on your device: nothing is saved or sent. Shade rendering is an indicative simulation.",
-    "tryCta": "Try it live"
+    "tryCta": "Try it live",
+    "zones": {
+      "lips": "Lips",
+      "cheeks": "Cheeks",
+      "eyes": "Eyelids",
+      "brows": "Brows",
+      "complexion": "Complexion"
+    },
+    "takePhoto": "Take the photo",
+    "savePhoto": "Save",
+    "backToCamera": "Back to camera",
+    "photoAlt": "Your makeup look"
   },
   "beautyRoutine": {
     "title": "My beauty routine",

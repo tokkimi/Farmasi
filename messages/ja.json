@@ -129,7 +129,7 @@
     "decoderTitle": "追加する前に、製品を読み解く。",
     "decoderText": "製品を検索して成分、原産地、使い方を確認できます。",
     "decoderScan": "製品をスキャン",
-    "decoderPlaceholder": "例: COSRX Snail 96 / Beauty of Joseon",
+    "decoderPlaceholder": "例：Creamy Lipstick、Resurface Serum",
     "decoderAction": "読み解く",
     "decoderHint": "購入を検討中ですか？Haru が製品を説明し、ルーティンと比較します。",
     "decoderMissing": "この製品はまだカタログにありません。公式ページをオンラインで探してください。",
@@ -553,7 +553,7 @@
     "shelfConflictOk": "現在のルーティンと相性の問題はありません。",
     "ocrDisclaimer": "ラベルの読み取りは小さな文字を誤読することがあります — ルーティンを変える前に実際のボトルで再確認してください。",
     "searchLabel": "バーコード、ブランド名、製品名",
-    "searchPlaceholder": "例：COSRX Snail Essence、880...",
+    "searchPlaceholder": "例：Matte Liquid Lipstick、Infinilash…",
     "searchCta": "検索"
   },
   "productsPage": {
@@ -1901,7 +1901,7 @@
     "decoderTitle": "追加する前に、製品を読み解く。",
     "decoderText": "製品を検索して成分、原産地、使い方を確認できます。",
     "decoderScan": "製品をスキャン",
-    "decoderPlaceholder": "例: COSRX Snail 96 / Beauty of Joseon",
+    "decoderPlaceholder": "例：Creamy Lipstick、Resurface Serum",
     "decoderAction": "読み解く",
     "decoderHint": "購入を検討中ですか？Haru が製品を説明し、ルーティンと比較します。",
     "decoderMissing": "この製品はまだカタログにありません。公式ページをオンラインで探してください。",
@@ -1944,7 +1944,7 @@
     "starting": "準備中…",
     "cameraDenied": "カメラへのアクセスが拒否されました。ブラウザの設定で許可してから再度お試しください。",
     "cameraError": "この端末ではカメラを起動できません。",
-    "faceFound": "顔を検出しました",
+    "faceFound": "すべての部位を検出しました",
     "noFace": "カメラに顔を向けてください",
     "compare": "長押し：ビフォー",
     "reset": "すべて外す",
@@ -1955,7 +1955,18 @@
     "addToRoutine": "マイルーティンに追加",
     "inRoutine": "マイルーティンに追加済み",
     "privacy": "画像は端末内にのみ残り、保存・送信されません。色の表現は目安のシミュレーションです。",
-    "tryCta": "ライブで試す"
+    "tryCta": "ライブで試す",
+    "zones": {
+      "lips": "唇",
+      "cheeks": "頬",
+      "eyes": "まぶた",
+      "brows": "眉",
+      "complexion": "肌"
+    },
+    "takePhoto": "写真を撮る",
+    "savePhoto": "保存",
+    "backToCamera": "カメラに戻る",
+    "photoAlt": "あなたのメイクルック"
   },
   "beautyRoutine": {
     "title": "マイ・ビューティールーティン",

@@ -129,7 +129,7 @@
     "decoderTitle": "추가하기 전에 제품을 분석하세요.",
     "decoderText": "제품을 검색해 성분, 원산지, 사용법을 확인하세요.",
     "decoderScan": "제품 스캔",
-    "decoderPlaceholder": "예: COSRX Snail 96 또는 Beauty of Joseon",
+    "decoderPlaceholder": "예: Creamy Lipstick 또는 Resurface Serum",
     "decoderAction": "분석하기",
     "decoderHint": "구매를 고민 중인가요? Haru가 제품을 설명하고 루틴과 비교합니다.",
     "decoderMissing": "아직 카탈로그에 없는 제품입니다. 공식 페이지를 온라인에서 찾아보세요.",
@@ -553,7 +553,7 @@
     "shelfConflictOk": "현재 루틴과 충돌하는 성분이 없어요.",
     "ocrDisclaimer": "라벨 판독은 작은 글씨를 잘못 읽을 수 있어요 — 루틴을 바꾸기 전에 실제 용기를 다시 확인하세요.",
     "searchLabel": "바코드, 브랜드 또는 제품명",
-    "searchPlaceholder": "예: COSRX 스네일 에센스, 880...",
+    "searchPlaceholder": "예: Matte Liquid Lipstick, Infinilash…",
     "searchCta": "검색"
   },
   "productsPage": {
@@ -1903,7 +1903,7 @@
     "decoderTitle": "추가하기 전에 제품을 분석하세요.",
     "decoderText": "제품을 검색해 성분, 원산지, 사용법을 확인하세요.",
     "decoderScan": "제품 스캔",
-    "decoderPlaceholder": "예: COSRX Snail 96 또는 Beauty of Joseon",
+    "decoderPlaceholder": "예: Creamy Lipstick 또는 Resurface Serum",
     "decoderAction": "분석하기",
     "decoderHint": "구매를 고민 중인가요? Haru가 제품을 설명하고 루틴과 비교합니다.",
     "decoderMissing": "아직 카탈로그에 없는 제품입니다. 공식 페이지를 온라인에서 찾아보세요.",
@@ -1946,7 +1946,7 @@
     "starting": "준비 중…",
     "cameraDenied": "카메라 접근이 거부되었습니다. 브라우저 설정에서 허용한 뒤 다시 시도하세요.",
     "cameraError": "이 기기에서 카메라를 시작할 수 없습니다.",
-    "faceFound": "얼굴 인식됨",
+    "faceFound": "모든 부위가 인식되었습니다",
     "noFace": "카메라를 정면으로 봐 주세요",
     "compare": "누르고 있기: 비포",
     "reset": "모두 지우기",
@@ -1957,7 +1957,18 @@
     "addToRoutine": "내 루틴에 추가",
     "inRoutine": "내 루틴에 있음",
     "privacy": "이미지는 기기에만 남으며 저장·전송되지 않습니다. 컬러 표현은 참고용 시뮬레이션입니다.",
-    "tryCta": "실시간으로 테스트"
+    "tryCta": "실시간으로 테스트",
+    "zones": {
+      "lips": "입술",
+      "cheeks": "볼",
+      "eyes": "눈두덩",
+      "brows": "눈썹",
+      "complexion": "피부톤"
+    },
+    "takePhoto": "사진 찍기",
+    "savePhoto": "저장",
+    "backToCamera": "카메라로 돌아가기",
+    "photoAlt": "나의 메이크업 룩"
   },
   "beautyRoutine": {
     "title": "나의 뷰티 루틴",
