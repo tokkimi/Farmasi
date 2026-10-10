@@ -1968,7 +1968,11 @@
     "takePhoto": "사진 찍기",
     "savePhoto": "저장",
     "backToCamera": "카메라로 돌아가기",
-    "photoAlt": "나의 메이크업 룩"
+    "photoAlt": "나의 메이크업 룩",
+    "close": "닫기",
+    "modeLive": "라이브",
+    "modePhoto": "사진",
+    "photoHint": "정지된 사진에 컬러를 골라 보세요"
   },
   "beautyRoutine": {
     "title": "나의 뷰티 루틴",

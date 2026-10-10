@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { Camera, CameraOff, Check, Download, Eye, EyeOff, Heart, Loader2, Plus, RotateCcw, ShieldCheck } from "lucide-react";
+import { Camera, CameraOff, Check, Download, Eye, EyeOff, Heart, Loader2, Plus, RotateCcw, ShoppingBag, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCatalog, useShelf } from "@/lib/shelf-store";
 import { FARMASI_TRY_ON_PRODUCTS, type FarmasiProduct, type TryOnArea } from "@/lib/seed-data/farmasi-catalog";
@@ -273,6 +272,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
   const lookRef = React.useRef<Look>({});
   const intensityRef = React.useRef(0.85);
   const compareRef = React.useRef(false);
+  const frozenRef = React.useRef<{ frame: HTMLCanvasElement; landmarks: FaceLandmarkPoint[] } | null>(null);
 
   const parsedLook = React.useMemo(() => parseLook(initialLook), [initialLook]);
   const firstLookSlug = Object.values(parsedLook)[0]?.slug;
@@ -283,6 +283,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
   const [progress, setProgress] = React.useState(0);
   const [faceFound, setFaceFound] = React.useState(false);
   const [photo, setPhoto] = React.useState<string | null>(null);
+  const [frozen, setFrozen] = React.useState(false);
   const [tab, setTab] = React.useState(
     initialProduct?.category === "lip-care" ? "lip-makeup" : (initialProduct?.category ?? "lip-makeup")
   );
@@ -374,8 +375,9 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             canvas.width = w;
             canvas.height = h;
           }
-          // Detect at the scanner's cadence (~15 fps), draw at full frame rate.
-          if (time - lastInference >= 50) {
+          const frozen = frozenRef.current;
+          // Detect at the scanner's cadence (~20 fps), draw at full frame rate.
+          if (!frozen && time - lastInference >= 50) {
             lastInference = time;
             const result = landmarker.detectForVideo(currentVideo, performance.now());
             const faceCount = result.faceLandmarks?.length ?? 0;
@@ -396,9 +398,9 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
           }
           ctx.save();
           ctx.setTransform(-1, 0, 0, 1, w, 0); // selfie mirror, like the scanner preview
-          ctx.drawImage(currentVideo, 0, 0, w, h);
-          const lm = smoothedRef.current;
-          if (lm && lastFound && !compareRef.current) {
+          ctx.drawImage(frozen?.frame ?? currentVideo, 0, 0, w, h);
+          const lm = frozen?.landmarks ?? smoothedRef.current;
+          if (lm && (frozen || lastFound) && !compareRef.current) {
             drawLook(ctx, lm.map((pt) => ({ x: pt.x * w, y: pt.y * h })), lookRef.current, intensityRef.current, 1);
           }
           ctx.restore();
@@ -422,11 +424,41 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
     };
   }, [start, stop]);
 
-  const takePhoto = () => {
+  /** Photo mode: freeze the current frame and keep trying shades on it. */
+  const toggleFreeze = () => {
+    const video = videoRef.current;
+    if (frozenRef.current) {
+      frozenRef.current = null;
+      setFrozen(false);
+      return;
+    }
+    const landmarks = smoothedRef.current;
+    if (!video || !landmarks || status !== "live") return;
+    const frame = document.createElement("canvas");
+    frame.width = video.videoWidth;
+    frame.height = video.videoHeight;
+    frame.getContext("2d")?.drawImage(video, 0, 0);
+    frozenRef.current = { frame, landmarks };
+    setFrozen(true);
+  };
+
+  const savePhoto = () => {
     const canvas = canvasRef.current;
     if (!canvas || status !== "live") return;
     setPhoto(canvas.toDataURL("image/jpeg", 0.92));
   };
+
+  // Full-screen mirror: lock the page underneath like a native app screen.
+  React.useEffect(() => {
+    const { overflow } = document.body.style;
+    const html = document.documentElement.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = overflow;
+      document.documentElement.style.overscrollBehavior = html;
+    };
+  }, []);
 
   const products = FARMASI_TRY_ON_PRODUCTS.filter((p) => p.category === tab || (tab === "lip-makeup" && p.category === "lip-care"));
   const active = FARMASI_TRY_ON_PRODUCTS.find((p) => p.slug === activeSlug) ?? products[0];
@@ -450,249 +482,269 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
     });
   };
 
+  const activeShadeData = activeShade >= 0 ? active?.shades?.[activeShade] : undefined;
+
   return (
-    <div className="mx-auto flex w-full max-w-[min(94vw,560px)] flex-col gap-4">
-      <div className="text-center">
-        <h1 className="font-serif text-3xl">{t("title")}</h1>
-        <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
-      </div>
+    <div className="fixed inset-0 z-[70] flex h-[100dvh] touch-manipulation select-none flex-col overflow-hidden overscroll-none bg-black text-white">
+      {/* ── Mirror: the face stays big and centred, live camera ── */}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <video ref={videoRef} muted playsInline className="absolute inset-0 size-full scale-x-[-1] object-cover opacity-0" />
+        <canvas ref={canvasRef} className="absolute inset-0 size-full object-cover" />
 
-      <div className="w-full overflow-hidden rounded-[1.75rem] border border-white/35 bg-black/20 shadow-[0_26px_80px_-50px_rgba(0,0,0,0.7)]">
-        <div className="relative h-[min(62svh,640px)] min-h-[360px] w-full bg-black">
-          <video ref={videoRef} muted playsInline className="absolute inset-0 size-full scale-x-[-1] object-cover opacity-0" />
-          <canvas ref={canvasRef} className="absolute inset-0 size-full object-cover" />
+        {(status === "denied" || status === "error") && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+            <CameraOff className="size-10 text-white/60" />
+            <p className="max-w-xs text-sm text-white/75">{status === "denied" ? t("cameraDenied") : t("cameraError")}</p>
+            <Button onClick={() => void start()} size="lg" className="rounded-full">
+              <Camera className="size-4" />
+              {t("start")}
+            </Button>
+          </div>
+        )}
 
-          {(status === "denied" || status === "error") && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
-              <CameraOff className="size-10 text-muted-foreground" />
-              <p className="max-w-xs text-sm text-muted-foreground">{status === "denied" ? t("cameraDenied") : t("cameraError")}</p>
-              <Button onClick={() => void start()} size="lg" className="rounded-full">
+        {status !== "denied" && status !== "error" && !frozen && !faceFound && <FaceGuideOverlay active={progress >= 0.2} className="text-white" />}
+
+        {/* Top bar */}
+        <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent px-4 pb-6 pt-[max(0.75rem,env(safe-area-inset-top))]">
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              href="/app/routine"
+              aria-label={t("close")}
+              className="flex size-10 items-center justify-center rounded-full border border-white/40 bg-black/30 backdrop-blur-md"
+            >
+              <X className="size-5" />
+            </Link>
+            <p className="font-serif text-lg">{t("title")}</p>
+            <div className="flex rounded-full border border-white/40 bg-black/30 p-0.5 text-xs font-medium backdrop-blur-md">
+              <button type="button" onClick={() => frozen && toggleFreeze()} className={cn("rounded-full px-3 py-1.5", !frozen && "bg-white text-black")}>
+                {t("modeLive")}
+              </button>
+              <button type="button" onClick={() => !frozen && toggleFreeze()} disabled={!faceFound && !frozen} className={cn("rounded-full px-3 py-1.5 disabled:opacity-40", frozen && "bg-white text-black")}>
+                {t("modePhoto")}
+              </button>
+            </div>
+          </div>
+          <div className="mx-1 mt-3 h-1 rounded-full bg-white/18">
+            <span
+              className="block h-full rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.9)] transition-all"
+              style={{ width: `${frozen ? 100 : Math.max(4, (faceFound ? Math.max(progress, 0.35) : 0) * 100)}%` }}
+            />
+          </div>
+          <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+            {ZONE_CHIPS.map((zone) => {
+              const applied = zone.areas.some((area) => look[area]);
+              const detected = faceFound || frozen;
+              return (
+                <span
+                  key={zone.key}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur-md transition",
+                    detected ? "border-white/55 bg-black/30 text-white" : "border-white/20 bg-black/15 text-white/45"
+                  )}
+                >
+                  {detected ? <Check className="size-3" /> : <span className="size-1.5 rounded-full bg-white/40" />}
+                  {t(`zones.${zone.key}`)}
+                  {applied && <span className="ml-0.5 size-1.5 rounded-full bg-primary" />}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Instruction + mirror controls */}
+        {status !== "denied" && status !== "error" && (
+          <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 bg-gradient-to-t from-black/55 to-transparent px-4 pb-3 pt-10">
+            <div className="max-w-[86vw] rounded-full border border-white/45 bg-black/25 px-4 py-1.5 text-center text-xs font-medium backdrop-blur-md">
+              {status === "loading" ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  {tPosition("holdStill")}
+                </span>
+              ) : frozen ? (
+                t("photoHint")
+              ) : aligned ? (
+                t("faceFound")
+              ) : (
+                tPosition(instruction)
+              )}
+            </div>
+            <div className="flex items-center gap-5">
+              <button
+                type="button"
+                onPointerDown={() => setCompare(true)}
+                onPointerUp={() => setCompare(false)}
+                onPointerLeave={() => setCompare(false)}
+                onPointerCancel={() => setCompare(false)}
+                onContextMenu={(e) => e.preventDefault()}
+                aria-label={t("compare")}
+                className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/30 backdrop-blur-md [-webkit-touch-callout:none]"
+              >
+                {compare ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+              <button
+                type="button"
+                onClick={savePhoto}
+                disabled={status !== "live"}
+                aria-label={t("takePhoto")}
+                className={cn(
+                  "flex size-14 items-center justify-center rounded-full border border-white/70 bg-white/10 backdrop-blur-md transition",
+                  faceFound || frozen ? "shadow-[0_0_28px_rgba(255,255,255,0.8)]" : "opacity-45"
+                )}
+              >
+                <Camera className="size-6" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setLook({})}
+                disabled={appliedCount === 0}
+                aria-label={t("reset")}
+                className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/30 backdrop-blur-md disabled:opacity-40"
+              >
+                <RotateCcw className="size-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {photo && (
+          <div className="absolute inset-0 z-10 flex flex-col bg-black">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photo} alt={t("photoAlt")} className="min-h-0 flex-1 object-cover" />
+            <div className="flex items-center justify-center gap-2 p-3">
+              <Button asChild size="sm" className="rounded-full">
+                <a href={photo} download="haru-farmasi-look.jpg">
+                  <Download className="size-4" />
+                  {t("savePhoto")}
+                </a>
+              </Button>
+              <Button size="sm" variant="outline" className="rounded-full" onClick={() => setPhoto(null)}>
                 <Camera className="size-4" />
-                {t("start")}
+                {t("backToCamera")}
               </Button>
             </div>
-          )}
-
-          {status !== "denied" && status !== "error" && (
-            <>
-              {!aligned && <FaceGuideOverlay active={progress >= 0.2} />}
-              <div className="absolute inset-x-5 top-4 h-1 rounded-full bg-white/18">
-                <span
-                  className="block h-full rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.9)] transition-all"
-                  style={{ width: `${Math.max(4, (faceFound ? Math.max(progress, 0.35) : 0) * 100)}%` }}
-                />
-              </div>
-
-              <div className="absolute inset-x-3 top-8 flex flex-wrap justify-center gap-1.5">
-                {ZONE_CHIPS.map((zone) => {
-                  const applied = zone.areas.some((area) => look[area]);
-                  return (
-                    <span
-                      key={zone.key}
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur-md transition",
-                        faceFound ? "border-white/55 bg-black/30 text-white" : "border-white/20 bg-black/15 text-white/45"
-                      )}
-                    >
-                      {faceFound ? <Check className="size-3" /> : <span className="size-1.5 rounded-full bg-white/40" />}
-                      {t(`zones.${zone.key}`)}
-                      {applied && <span className="ml-0.5 size-1.5 rounded-full bg-primary" />}
-                    </span>
-                  );
-                })}
-              </div>
-
-              <div className="absolute inset-x-4 bottom-4 flex flex-col items-center gap-2">
-                <div className="max-w-[86vw] rounded-full border border-white/45 bg-black/18 px-4 py-2 text-center text-xs font-medium text-white backdrop-blur-md sm:text-sm">
-                  {status === "loading" ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
-                      {tPosition("holdStill")}
-                    </span>
-                  ) : aligned ? (
-                    t("faceFound")
-                  ) : (
-                    tPosition(instruction)
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onPointerDown={() => setCompare(true)}
-                    onPointerUp={() => setCompare(false)}
-                    onPointerLeave={() => setCompare(false)}
-                    onPointerCancel={() => setCompare(false)}
-                    onContextMenu={(e) => e.preventDefault()}
-                    aria-label={t("compare")}
-                    className="flex size-11 select-none items-center justify-center rounded-full border border-white/50 bg-black/25 text-white backdrop-blur-md [-webkit-touch-callout:none]"
-                  >
-                    {compare ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={takePhoto}
-                    disabled={status !== "live"}
-                    aria-label={t("takePhoto")}
-                    className={cn(
-                      "flex size-14 items-center justify-center rounded-full border border-white/70 bg-white/10 text-white backdrop-blur-md transition sm:size-16",
-                      faceFound ? "shadow-[0_0_28px_rgba(255,255,255,0.8)] hover:bg-white/20" : "opacity-45"
-                    )}
-                  >
-                    <Camera className="size-6 sm:size-7" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLook({})}
-                    disabled={appliedCount === 0}
-                    aria-label={t("reset")}
-                    className="flex size-11 items-center justify-center rounded-full border border-white/50 bg-black/25 text-white backdrop-blur-md disabled:opacity-40"
-                  >
-                    <RotateCcw className="size-4" />
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
-
-          {photo && (
-            <div className="absolute inset-0 z-10 flex flex-col bg-black">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo} alt={t("photoAlt")} className="min-h-0 flex-1 object-cover" />
-              <div className="flex items-center justify-center gap-2 p-3">
-                <Button asChild size="sm" className="rounded-full">
-                  <a href={photo} download="haru-farmasi-look.jpg">
-                    <Download className="size-4" />
-                    {t("savePhoto")}
-                  </a>
-                </Button>
-                <Button size="sm" variant="outline" className="rounded-full" onClick={() => setPhoto(null)}>
-                  <Camera className="size-4" />
-                  {t("backToCamera")}
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
-        {CATEGORY_TABS.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => {
-              setTab(item.key);
-              const first = FARMASI_TRY_ON_PRODUCTS.find((p) => p.category === item.key);
-              if (first) setActiveSlug(first.slug);
-            }}
-            className={cn(
-              "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition",
-              tab === item.key ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-secondary"
-            )}
-          >
-            {tCategories(item.key)}
-          </button>
-        ))}
-      </div>
-
-      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-        {products.map((product) => {
-          const applied = product.tryOn && look[product.tryOn]?.slug === product.slug;
-          return (
-            <button
-              key={product.slug}
-              type="button"
-              onClick={() => setActiveSlug(product.slug)}
-              className={cn(
-                "flex shrink-0 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition",
-                product.slug === active?.slug ? "border-primary bg-primary/10" : "border-border bg-card"
-              )}
-            >
-              {applied && <Check className="size-3.5 text-primary" />}
-              <span className="max-w-[11rem] truncate font-medium">{product.name}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {active && (
-        <Card className="gap-4 p-4">
-          <div className="flex items-start justify-between gap-3">
+      {/* ── Bottom sheet: products & shades, applied instantly ── */}
+      <div className="shrink-0 rounded-t-[1.75rem] border-t border-white/15 bg-[#120f0e] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+        {active && (
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate font-semibold">{active.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {active.brand} · {active.size}
+              <p className="truncate text-sm font-semibold">{active.name}</p>
+              <p className="truncate text-xs text-white/60">
+                {activeShadeData ? `${activeShadeData.name}${activeShadeData.code ? ` · réf. ${activeShadeData.code}` : ""}` : t("pickShade")}
                 {active.price != null ? ` · ${active.price.toFixed(2).replace(".", ",")} €` : ""}
               </p>
             </div>
-            <button
-              type="button"
-              aria-label={t("favorite")}
-              onClick={() => activeShade >= 0 && favorites.toggle(active.slug, activeShade)}
-              disabled={activeShade < 0}
-              className="rounded-full p-2 text-primary disabled:opacity-40"
-            >
-              <Heart className={cn("size-5", activeShade >= 0 && favorites.has(active.slug, activeShade) && "fill-current")} />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
-            {active.shades?.map((shade, index) => (
+            <div className="flex shrink-0 items-center gap-1">
               <button
-                key={shade.name}
                 type="button"
-                title={shade.name}
-                aria-label={shade.name}
-                aria-pressed={activeShade === index}
-                onClick={() => chooseShade(active, index)}
+                aria-label={t("favorite")}
+                onClick={() => activeShade >= 0 && favorites.toggle(active.slug, activeShade)}
+                disabled={activeShade < 0}
+                className="flex size-10 items-center justify-center rounded-full text-primary disabled:opacity-40"
+              >
+                <Heart className={cn("size-5", activeShade >= 0 && favorites.has(active.slug, activeShade) && "fill-current")} />
+              </button>
+              {dbProduct && (
+                <button
+                  type="button"
+                  aria-label={inShelf ? t("inRoutine") : t("addToRoutine")}
+                  disabled={inShelf}
+                  onClick={() => addProduct(dbProduct)}
+                  className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:bg-white/10 disabled:text-white"
+                >
+                  {inShelf ? <Check className="size-4" /> : <Plus className="size-4" />}
+                </button>
+              )}
+              <Link
+                href={`/app/product/${active.slug}`}
+                aria-label={t("productSheet")}
+                className="flex size-10 items-center justify-center rounded-full border border-white/25"
+              >
+                <ShoppingBag className="size-4" />
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Shades: tap = applied live on the face */}
+        <div className="no-scrollbar -mx-4 mt-3 flex gap-3 overflow-x-auto px-4 py-1">
+          {active?.shades?.map((shade, index) => (
+            <button
+              key={shade.name}
+              type="button"
+              aria-label={shade.name}
+              aria-pressed={activeShade === index}
+              onClick={() => chooseShade(active, index)}
+              className={cn(
+                "size-11 shrink-0 rounded-full ring-2 ring-offset-2 ring-offset-[#120f0e] transition",
+                activeShade === index ? "scale-110 ring-white" : "ring-transparent"
+              )}
+              style={{
+                background: shade.palette
+                  ? `conic-gradient(${shade.palette.map((c, i, arr) => `${c} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ")})`
+                  : shade.hex,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Products of the selected zone */}
+        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
+          {products.map((product) => {
+            const applied = product.tryOn && look[product.tryOn]?.slug === product.slug;
+            return (
+              <button
+                key={product.slug}
+                type="button"
+                onClick={() => setActiveSlug(product.slug)}
                 className={cn(
-                  "aspect-square w-full rounded-full ring-2 ring-offset-2 ring-offset-card transition",
-                  activeShade === index ? "ring-primary" : "ring-transparent"
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition",
+                  product.slug === active?.slug ? "border-white bg-white text-black" : "border-white/20 bg-white/[0.06]"
                 )}
-                style={{
-                  background: shade.palette
-                    ? `conic-gradient(${shade.palette.map((c, i, arr) => `${c} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ")})`
-                    : shade.hex,
+              >
+                {applied && <span className="size-1.5 rounded-full bg-primary" />}
+                <span className="max-w-[10rem] truncate">{product.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Zones: lips / eyes / complexion + intensity */}
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex flex-1 gap-1 rounded-full bg-white/[0.06] p-1">
+            {CATEGORY_TABS.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => {
+                  setTab(item.key);
+                  const first = FARMASI_TRY_ON_PRODUCTS.find((p) => p.category === item.key);
+                  if (first) setActiveSlug(first.slug);
                 }}
-              />
+                className={cn(
+                  "flex-1 rounded-full py-2 text-sm font-medium transition",
+                  tab === item.key ? "bg-primary text-primary-foreground" : "text-white/75"
+                )}
+              >
+                {tCategories(item.key)}
+              </button>
             ))}
           </div>
-          <p className="min-h-5 text-sm text-muted-foreground">
-            {activeShade >= 0 ? active.shades?.[activeShade]?.name : t("pickShade")}
-            {activeShade >= 0 && active.shades?.[activeShade]?.code ? ` · réf. ${active.shades[activeShade].code}` : ""}
-          </p>
-
-          <label className="flex items-center gap-3 text-sm">
-            <span className="shrink-0 text-muted-foreground">{t("intensity")}</span>
-            <input
-              type="range"
-              min={0.2}
-              max={1}
-              step={0.05}
-              value={intensity}
-              onChange={(e) => setIntensity(Number(e.target.value))}
-              className="w-full accent-[var(--primary)]"
-            />
-          </label>
-
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/app/product/${active.slug}`}>{t("productSheet")}</Link>
-            </Button>
-            {dbProduct && (
-              <Button size="sm" variant={inShelf ? "secondary" : "default"} disabled={inShelf} onClick={() => addProduct(dbProduct)}>
-                {inShelf ? <Check className="size-4" /> : <Plus className="size-4" />}
-                {inShelf ? t("inRoutine") : t("addToRoutine")}
-              </Button>
-            )}
-          </div>
-        </Card>
-      )}
-
-      <p className="flex items-start gap-2 rounded-xl bg-muted/60 p-3 text-left text-xs text-muted-foreground">
-        <ShieldCheck className="mt-0.5 size-4 shrink-0" />
-        {t("privacy")}
-      </p>
+          <input
+            type="range"
+            aria-label={t("intensity")}
+            min={0.2}
+            max={1}
+            step={0.05}
+            value={intensity}
+            onChange={(e) => setIntensity(Number(e.target.value))}
+            className="w-20 accent-[var(--primary)]"
+          />
+        </div>
+      </div>
     </div>
   );
 }

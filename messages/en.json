@@ -1963,7 +1963,11 @@
     "takePhoto": "Take the photo",
     "savePhoto": "Save",
     "backToCamera": "Back to camera",
-    "photoAlt": "Your makeup look"
+    "photoAlt": "Your makeup look",
+    "close": "Close",
+    "modeLive": "Live",
+    "modePhoto": "Photo",
+    "photoHint": "Photo frozen: pick your shades"
   },
   "beautyRoutine": {
     "title": "My beauty routine",

@@ -1966,7 +1966,11 @@
     "takePhoto": "写真を撮る",
     "savePhoto": "保存",
     "backToCamera": "カメラに戻る",
-    "photoAlt": "あなたのメイクルック"
+    "photoAlt": "あなたのメイクルック",
+    "close": "閉じる",
+    "modeLive": "ライブ",
+    "modePhoto": "写真",
+    "photoHint": "静止画で色を選べます"
   },
   "beautyRoutine": {
     "title": "マイ・ビューティールーティン",

@@ -1966,7 +1966,11 @@
     "takePhoto": "Prendre la photo",
     "savePhoto": "Enregistrer",
     "backToCamera": "Retour caméra",
-    "photoAlt": "Votre look maquillage"
+    "photoAlt": "Votre look maquillage",
+    "close": "Fermer",
+    "modeLive": "Live",
+    "modePhoto": "Photo",
+    "photoHint": "Photo figée : choisissez vos teintes"
   },
   "beautyRoutine": {
     "title": "Ma routine beauté",
