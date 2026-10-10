@@ -8,6 +8,7 @@ import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
 import { WellnessShowcase } from "@/components/marketing/wellness-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { ShopSection } from "@/components/marketing/shop-section";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
 import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
 import { RoutineLabPreview } from "@/components/marketing/routine-lab-preview";
@@ -120,6 +121,7 @@ export default async function Home({
         <ScanShowcase />
         <AuditShowcase />
         <Suspense fallback={<div className="h-[48rem]" aria-busy="true" />}><HomeRoutineBuilder /></Suspense>
+        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeShop /></Suspense>
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
         <Suspense fallback={null}><HomeNews /></Suspense>
         <FinalCta />
@@ -132,6 +134,13 @@ export default async function Home({
 async function HomeProducts() {
   const products = await getHomeProducts();
   return <ProductShowcase latest={products.latest} madeInKorea={products.makeup} />;
+}
+
+async function HomeShop() {
+  const products = await db.product
+    .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { name: "asc" }] })
+    .catch(() => []);
+  return <ShopSection products={products.length ? products : fallbackProducts(undefined, PRODUCTS.length)} />;
 }
 
 async function HomeRoutineBuilder() {

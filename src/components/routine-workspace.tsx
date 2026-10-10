@@ -25,6 +25,7 @@ import { IngredientExposurePanel } from "@/components/ingredient-exposure-panel"
 import { WeeklyRhythmPanel } from "@/components/weekly-rhythm-panel";
 import { ReactionJournal } from "@/components/reaction-journal";
 import { RoutineProtocolPanel } from "@/components/routine-protocol-panel";
+import { BeautyRoutinePanel } from "@/components/beauty-routine-panel";
 import { useShelf } from "@/lib/shelf-store";
 import type { Product } from "@/generated/prisma/client";
 
@@ -344,6 +345,7 @@ export function RoutineWorkspace() {
   const favorites = shelf.filter((p) => preferences[p.id]?.favorite);
   const tabs = [
     ["routine", t("tabs.routine")],
+    ["beauty", t("tabs.beauty")],
     ["analysis", t("tabs.analysis")],
     ["reactions", t("tabs.reactions")],
     ["favorites", t("tabs.favorites")],
@@ -400,6 +402,8 @@ export function RoutineWorkspace() {
           )}
         </div>
       )}
+
+      {tab === "beauty" && <BeautyRoutinePanel shelf={shelf} />}
 
       {tab === "reactions" && <ReactionJournal products={shelf} />}
 

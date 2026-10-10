@@ -1489,7 +1489,8 @@
       "links": "Vidéos",
       "reactions": "Réactions",
       "analysis": "Analyse routine",
-      "productCare": "Suivi de mes produits"
+      "productCare": "Suivi de mes produits",
+      "beauty": "Beauté"
     },
     "routineSlot": {
       "both": "Matin et soir",
@@ -1934,5 +1935,71 @@
     "next": "Module suivant",
     "openRoutine": "Ouvrir ma routine",
     "note": "Contenu éducatif général, sans diagnostic. Pour une réaction importante ou persistante, consultez un professionnel de santé."
+  },
+  "tryOn": {
+    "title": "Beauty VR Try-On",
+    "subtitle": "Essayez chaque teinte Farmasi en direct, caméra ouverte, sans quitter le site.",
+    "intro": "Activez la caméra pour appliquer virtuellement rouges à lèvres, blush, fards, liners, sourcils et fonds de teint du catalogue.",
+    "start": "Ouvrir la caméra",
+    "starting": "Préparation…",
+    "cameraDenied": "L'accès à la caméra a été refusé. Autorisez-le dans les réglages de votre navigateur puis réessayez.",
+    "cameraError": "Impossible de démarrer la caméra sur cet appareil.",
+    "faceFound": "Visage détecté",
+    "noFace": "Placez votre visage face à la caméra",
+    "compare": "Maintenir : avant",
+    "reset": "Tout retirer",
+    "favorite": "Ajouter aux favoris",
+    "pickShade": "Choisissez une teinte à essayer",
+    "intensity": "Intensité",
+    "productSheet": "Fiche produit",
+    "addToRoutine": "Ajouter à ma routine",
+    "inRoutine": "Dans ma routine",
+    "privacy": "L'image reste sur votre appareil : rien n'est enregistré ni envoyé. Le rendu des teintes est une simulation indicative.",
+    "tryCta": "Essayer en direct"
+  },
+  "beautyRoutine": {
+    "title": "Ma routine beauté",
+    "subtitle": "Des routines maquillage composées avec le catalogue Farmasi, à essayer en direct.",
+    "openTryOn": "Beauty VR Try-On",
+    "tryLook": "Essayer ce look",
+    "favoritesTitle": "Mes teintes favorites",
+    "favoritesEmpty": "Ajoutez des teintes en favoris depuis l'essai virtuel (icône cœur).",
+    "removeFavorite": "Retirer des favoris",
+    "myMakeupTitle": "Mon maquillage",
+    "myMakeupEmpty": "Aucun produit maquillage dans votre routine pour l'instant.",
+    "browseMakeup": "Parcourir le maquillage",
+    "routines": {
+      "natural": {
+        "title": "Naturel du quotidien",
+        "note": "Un teint frais en 5 minutes, léger et lumineux."
+      },
+      "office": {
+        "title": "Bureau impeccable",
+        "note": "Teint unifié, regard défini et lèvres nude qui tiennent toute la journée."
+      },
+      "glow": {
+        "title": "Glow peau radieuse",
+        "note": "Base illuminatrice, pêche et gloss pour un effet bonne mine."
+      },
+      "evening": {
+        "title": "Soirée intense",
+        "note": "Teint sculpté, smoky terre, liner et rouge mat."
+      }
+    }
+  },
+  "shop": {
+    "eyebrow": "Shop",
+    "title": "Le catalogue Farmasi",
+    "subtitle": "Maquillage, soins Dr. C. Tuna, parfums et essentiels — chaque teinte s'essaie en direct avec la caméra.",
+    "tabs": {
+      "all": "Tout",
+      "skincare": "Soins",
+      "personal": "Soins personnels"
+    },
+    "shades": "{count} teintes",
+    "tryOn": "Essayer en direct",
+    "view": "Voir le produit",
+    "tryOnCta": "Beauty VR Try-On",
+    "browseAll": "Tout le catalogue"
   }
 }

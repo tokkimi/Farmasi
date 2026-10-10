@@ -1489,7 +1489,8 @@
       "links": "動画",
       "reactions": "反応",
       "analysis": "ルーティン分析",
-      "productCare": "製品管理"
+      "productCare": "製品管理",
+      "beauty": "ビューティー"
     },
     "routineSlot": {
       "both": "朝と夜",
@@ -1934,5 +1935,71 @@
     "next": "次のモジュール",
     "openRoutine": "マイルーティンを開く",
     "note": "診断ではなく一般的な学習情報です。強い、または持続する反応がある場合は医療機関に相談してください。"
+  },
+  "tryOn": {
+    "title": "Beauty VR Try-On",
+    "subtitle": "サイトを離れずに、カメラでファルマシの全色をライブで試せます。",
+    "intro": "カメラをオンにして、カタログのリップ、チーク、アイシャドウ、ライナー、アイブロウ、ファンデーションをバーチャルで試しましょう。",
+    "start": "カメラを起動",
+    "starting": "準備中…",
+    "cameraDenied": "カメラへのアクセスが拒否されました。ブラウザの設定で許可してから再度お試しください。",
+    "cameraError": "この端末ではカメラを起動できません。",
+    "faceFound": "顔を検出しました",
+    "noFace": "カメラに顔を向けてください",
+    "compare": "長押し：ビフォー",
+    "reset": "すべて外す",
+    "favorite": "お気に入りに追加",
+    "pickShade": "試す色を選んでください",
+    "intensity": "濃さ",
+    "productSheet": "商品ページ",
+    "addToRoutine": "マイルーティンに追加",
+    "inRoutine": "マイルーティンに追加済み",
+    "privacy": "画像は端末内にのみ残り、保存・送信されません。色の表現は目安のシミュレーションです。",
+    "tryCta": "ライブで試す"
+  },
+  "beautyRoutine": {
+    "title": "マイ・ビューティールーティン",
+    "subtitle": "ファルマシのカタログで組んだメイクルーティンをライブで試せます。",
+    "openTryOn": "Beauty VR Try-On",
+    "tryLook": "このルックを試す",
+    "favoritesTitle": "お気に入りの色",
+    "favoritesEmpty": "バーチャル試着でハートを押して色を保存しましょう。",
+    "removeFavorite": "お気に入りから外す",
+    "myMakeupTitle": "マイメイク",
+    "myMakeupEmpty": "ルーティンにメイク製品はまだありません。",
+    "browseMakeup": "メイクを見る",
+    "routines": {
+      "natural": {
+        "title": "デイリーナチュラル",
+        "note": "5分で軽やかで明るい肌に。"
+      },
+      "office": {
+        "title": "オフィスメイク",
+        "note": "一日中続く均一な肌、印象的な目元、ヌードリップ。"
+      },
+      "glow": {
+        "title": "ツヤ肌グロウ",
+        "note": "イルミネーティングベース、ピーチ、グロスで血色感を。"
+      },
+      "evening": {
+        "title": "イブニングルック",
+        "note": "立体的な肌、ブラウンスモーキー、ライナーとマットレッド。"
+      }
+    }
+  },
+  "shop": {
+    "eyebrow": "Shop",
+    "title": "ファルマシ カタログ",
+    "subtitle": "メイク、Dr. C. Tuna スキンケア、フレグランス、必需品 — カメラで全色をライブで試せます。",
+    "tabs": {
+      "all": "すべて",
+      "skincare": "スキンケア",
+      "personal": "パーソナルケア"
+    },
+    "shades": "{count}色",
+    "tryOn": "ライブで試す",
+    "view": "商品を見る",
+    "tryOnCta": "Beauty VR Try-On",
+    "browseAll": "カタログ全体"
   }
 }

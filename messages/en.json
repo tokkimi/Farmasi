@@ -1489,7 +1489,8 @@
       "links": "Videos",
       "reactions": "Reactions",
       "analysis": "Routine analysis",
-      "productCare": "Product tracking"
+      "productCare": "Product tracking",
+      "beauty": "Beauty"
     },
     "routineSlot": {
       "both": "Morning and evening",
@@ -1931,5 +1932,71 @@
     "next": "Next module",
     "openRoutine": "Open my routine",
     "note": "General educational information, not a diagnosis. Consult a healthcare professional for a significant or persistent reaction."
+  },
+  "tryOn": {
+    "title": "Beauty VR Try-On",
+    "subtitle": "Try every Farmasi shade live with your camera, without leaving the site.",
+    "intro": "Turn on the camera to virtually apply lipsticks, blush, eyeshadows, liners, brows and foundations from the catalogue.",
+    "start": "Open the camera",
+    "starting": "Getting ready…",
+    "cameraDenied": "Camera access was denied. Allow it in your browser settings and try again.",
+    "cameraError": "The camera couldn't start on this device.",
+    "faceFound": "Face detected",
+    "noFace": "Face the camera",
+    "compare": "Hold: before",
+    "reset": "Remove all",
+    "favorite": "Add to favourites",
+    "pickShade": "Pick a shade to try",
+    "intensity": "Intensity",
+    "productSheet": "Product sheet",
+    "addToRoutine": "Add to my routine",
+    "inRoutine": "In my routine",
+    "privacy": "The image stays on your device: nothing is saved or sent. Shade rendering is an indicative simulation.",
+    "tryCta": "Try it live"
+  },
+  "beautyRoutine": {
+    "title": "My beauty routine",
+    "subtitle": "Makeup routines built from the Farmasi catalogue, ready to try live.",
+    "openTryOn": "Beauty VR Try-On",
+    "tryLook": "Try this look",
+    "favoritesTitle": "My favourite shades",
+    "favoritesEmpty": "Save shades as favourites from the virtual try-on (heart icon).",
+    "removeFavorite": "Remove from favourites",
+    "myMakeupTitle": "My makeup",
+    "myMakeupEmpty": "No makeup products in your routine yet.",
+    "browseMakeup": "Browse makeup",
+    "routines": {
+      "natural": {
+        "title": "Everyday natural",
+        "note": "A fresh, light, luminous complexion in 5 minutes."
+      },
+      "office": {
+        "title": "Polished office",
+        "note": "Even skin, defined eyes and nude lips that last all day."
+      },
+      "glow": {
+        "title": "Radiant glow",
+        "note": "Illuminating base, peach tones and gloss for a healthy glow."
+      },
+      "evening": {
+        "title": "Night out",
+        "note": "Sculpted skin, earthy smoky eye, liner and matte red."
+      }
+    }
+  },
+  "shop": {
+    "eyebrow": "Shop",
+    "title": "The Farmasi catalogue",
+    "subtitle": "Makeup, Dr. C. Tuna skincare, fragrances and essentials — try every shade live with your camera.",
+    "tabs": {
+      "all": "All",
+      "skincare": "Skincare",
+      "personal": "Personal care"
+    },
+    "shades": "{count} shades",
+    "tryOn": "Try it live",
+    "view": "View product",
+    "tryOnCta": "Beauty VR Try-On",
+    "browseAll": "Full catalogue"
   }
 }

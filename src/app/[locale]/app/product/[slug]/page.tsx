@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { ArrowLeft, ExternalLink, MapPin, Tag } from "lucide-react";
+import { ArrowLeft, ExternalLink, MapPin, Sparkles, Tag } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ProductActions } from "@/components/product-actions";
 import { ProductImage } from "@/components/product-image";
 import { findProductBySlug } from "@/lib/products";
+import { findFarmasiProduct } from "@/lib/seed-data/farmasi-catalog";
 import { findMarketFormulas } from "@/lib/product-formulas";
 import { findIngredient } from "@/data/ingredients";
 import {
@@ -27,12 +28,14 @@ export default async function ProductDetailPage({
   const product = await findProductBySlug(slug);
   if (!product) notFound();
 
-  const [t, tCategories, tIngredients, tSkinTypes, tConcerns] = await Promise.all([
+  const catalogEntry = findFarmasiProduct(product.slug);
+  const [t, tCategories, tIngredients, tSkinTypes, tConcerns, tTryOn] = await Promise.all([
     getTranslations("productDetail"),
     getTranslations("categories"),
     getTranslations("ingredients"),
     getTranslations("skinTypes"),
     getTranslations("concerns"),
+    getTranslations("tryOn"),
   ]);
 
   const trackedActives = product.ingredientIds.filter((id) => findIngredient(id));
@@ -94,6 +97,33 @@ export default async function ProductDetailPage({
 
       {description && (
         <p className="leading-relaxed text-muted-foreground">{description}</p>
+      )}
+
+      {catalogEntry && (catalogEntry.shades?.length || catalogEntry.codes.length > 0) && (
+        <Card className="gap-3">
+          {catalogEntry.shades && catalogEntry.shades.length > 1 && (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+              {catalogEntry.shades.map((shade) => (
+                <div key={shade.name} className="flex min-w-0 items-center gap-2 text-sm">
+                  <span className="size-5 shrink-0 rounded-full ring-1 ring-border" style={{ background: shade.hex }} />
+                  <span className="truncate">{shade.name}</span>
+                  {shade.code && <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{shade.code}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            {[catalogEntry.line, catalogEntry.size, catalogEntry.shades && catalogEntry.shades.length > 1 ? null : catalogEntry.codes.join(" · ")].filter(Boolean).join(" · ")}
+          </p>
+          {catalogEntry.tryOn && (
+            <Button asChild className="w-fit rounded-full">
+              <Link href={`/app/try-on?product=${catalogEntry.slug}`}>
+                <Sparkles className="size-4" />
+                {tTryOn("tryCta")}
+              </Link>
+            </Button>
+          )}
+        </Card>
       )}
 
       <ProductActions product={product} />

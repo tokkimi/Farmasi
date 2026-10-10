@@ -1489,7 +1489,8 @@
       "links": "영상",
       "reactions": "반응",
       "analysis": "루틴 분석",
-      "productCare": "제품 관리"
+      "productCare": "제품 관리",
+      "beauty": "뷰티"
     },
     "routineSlot": {
       "both": "아침과 저녁",
@@ -1936,5 +1937,71 @@
     "next": "다음 모듈",
     "openRoutine": "내 루틴 열기",
     "note": "진단이 아닌 일반 교육 정보입니다. 심하거나 지속되는 반응은 의료진과 상담하세요."
+  },
+  "tryOn": {
+    "title": "Beauty VR Try-On",
+    "subtitle": "사이트를 떠나지 않고 카메라로 모든 파르마시 컬러를 실시간으로 테스트하세요.",
+    "intro": "카메라를 켜고 카탈로그의 립스틱, 블러셔, 섀도, 라이너, 브로우, 파운데이션을 가상으로 발라보세요.",
+    "start": "카메라 열기",
+    "starting": "준비 중…",
+    "cameraDenied": "카메라 접근이 거부되었습니다. 브라우저 설정에서 허용한 뒤 다시 시도하세요.",
+    "cameraError": "이 기기에서 카메라를 시작할 수 없습니다.",
+    "faceFound": "얼굴 인식됨",
+    "noFace": "카메라를 정면으로 봐 주세요",
+    "compare": "누르고 있기: 비포",
+    "reset": "모두 지우기",
+    "favorite": "즐겨찾기에 추가",
+    "pickShade": "테스트할 컬러를 선택하세요",
+    "intensity": "강도",
+    "productSheet": "제품 정보",
+    "addToRoutine": "내 루틴에 추가",
+    "inRoutine": "내 루틴에 있음",
+    "privacy": "이미지는 기기에만 남으며 저장·전송되지 않습니다. 컬러 표현은 참고용 시뮬레이션입니다.",
+    "tryCta": "실시간으로 테스트"
+  },
+  "beautyRoutine": {
+    "title": "나의 뷰티 루틴",
+    "subtitle": "파르마시 카탈로그로 구성한 메이크업 루틴을 실시간으로 테스트하세요.",
+    "openTryOn": "Beauty VR Try-On",
+    "tryLook": "이 룩 테스트",
+    "favoritesTitle": "즐겨찾는 컬러",
+    "favoritesEmpty": "가상 테스트에서 하트 아이콘으로 컬러를 저장하세요.",
+    "removeFavorite": "즐겨찾기 해제",
+    "myMakeupTitle": "내 메이크업",
+    "myMakeupEmpty": "아직 루틴에 메이크업 제품이 없습니다.",
+    "browseMakeup": "메이크업 둘러보기",
+    "routines": {
+      "natural": {
+        "title": "데일리 내추럴",
+        "note": "5분 만에 가볍고 화사한 피부."
+      },
+      "office": {
+        "title": "오피스 메이크업",
+        "note": "하루 종일 유지되는 균일한 피부, 또렷한 눈매, 누드 립."
+      },
+      "glow": {
+        "title": "광채 글로우",
+        "note": "일루미네이팅 베이스, 피치 톤, 글로스로 생기 있게."
+      },
+      "evening": {
+        "title": "이브닝 룩",
+        "note": "윤곽 메이크업, 브라운 스모키, 라이너와 매트 레드."
+      }
+    }
+  },
+  "shop": {
+    "eyebrow": "Shop",
+    "title": "파르마시 카탈로그",
+    "subtitle": "메이크업, Dr. C. Tuna 스킨케어, 향수와 필수템 — 카메라로 모든 컬러를 실시간 테스트하세요.",
+    "tabs": {
+      "all": "전체",
+      "skincare": "스킨케어",
+      "personal": "퍼스널 케어"
+    },
+    "shades": "{count}가지 컬러",
+    "tryOn": "실시간 테스트",
+    "view": "제품 보기",
+    "tryOnCta": "Beauty VR Try-On",
+    "browseAll": "전체 카탈로그"
   }
 }
