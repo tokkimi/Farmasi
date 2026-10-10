@@ -3,6 +3,17 @@ import type { Product, Prisma } from "@/generated/prisma/client";
 import { PRODUCTS } from "@/lib/seed-data/products";
 import { categoryDescendants } from "@/lib/categories";
 import { cleanCatalogProduct, shouldExcludeProduct } from "@/lib/catalog-cleanup";
+import { FARMASI_BRAND } from "@/lib/seed-data/farmasi-catalog";
+
+/**
+ * The database is shared with Haru: every product query on this site is
+ * scoped to the Farmasi catalogue so no other product ever shows up.
+ */
+export const CATALOG_SCOPE = { brand: FARMASI_BRAND } satisfies Prisma.ProductWhereInput;
+
+export function isCatalogProduct(product: { brand: string }) {
+  return product.brand === FARMASI_BRAND;
+}
 
 export type { Product };
 
@@ -48,9 +59,25 @@ export function getFallbackProducts() {
 
 export function listProducts() {
   return db.product
-    .findMany({ orderBy: { name: "asc" } })
-    .then((products) => products.filter((product) => !shouldExcludeProduct(product)).map(cleanDbProduct))
+    .findMany({ where: CATALOG_SCOPE, orderBy: { name: "asc" } })
+    .then((products) =>
+      products.length ? products.filter((product) => !shouldExcludeProduct(product)).map(cleanDbProduct) : FALLBACK_PRODUCTS
+    )
     .catch(() => FALLBACK_PRODUCTS);
+}
+
+/** In-memory search over the bundled catalogue (DB unreachable or not seeded yet). */
+function searchFallback(filters: ProductSearchFilters, limit: number) {
+  const q = filters.q?.toLowerCase();
+  const categories = filters.category ? categoryDescendants(filters.category) : null;
+  const matches = FALLBACK_PRODUCTS.filter(
+    (product) =>
+      (!q || product.name.toLowerCase().includes(q) || product.brand.toLowerCase().includes(q)) &&
+      (!categories || categories.includes(product.category)) &&
+      (!filters.skinType || product.skinTypes.includes(filters.skinType)) &&
+      (!filters.concern || product.concerns.includes(filters.concern))
+  );
+  return { products: matches.slice(0, limit), total: matches.length };
 }
 
 export const PRODUCTS_BATCH_SIZE = 20;
@@ -72,7 +99,7 @@ export type ProductSearchFilters = {
  * to a middle page).
  */
 export async function searchProducts(filters: ProductSearchFilters, limit: number) {
-  const where: Prisma.ProductWhereInput = {};
+  const where: Prisma.ProductWhereInput = { ...CATALOG_SCOPE };
   if (filters.q) {
     where.OR = [
       { name: { contains: filters.q, mode: "insensitive" } },
@@ -88,9 +115,6 @@ export async function searchProducts(filters: ProductSearchFilters, limit: numbe
   if (filters.concern) {
     where.concerns = { has: filters.concern };
   }
-  if (filters.brand) {
-    where.brand = filters.brand;
-  }
 
   const safeLimit = Math.max(PRODUCTS_BATCH_SIZE, limit);
 
@@ -99,41 +123,38 @@ export async function searchProducts(filters: ProductSearchFilters, limit: numbe
       db.product.findMany({ where, orderBy: { name: "asc" }, take: safeLimit }),
       db.product.count({ where }),
     ]);
+    if (total === 0 && (await db.product.count({ where: CATALOG_SCOPE })) === 0) {
+      return searchFallback(filters, safeLimit);
+    }
     return { products, total };
   } catch {
-    return {
-      products: FALLBACK_PRODUCTS.slice(0, safeLimit),
-      total: FALLBACK_PRODUCTS.length,
-    };
+    return searchFallback(filters, safeLimit);
   }
 }
 
 /** Distinct brand names for the products browser's brand filter — cheap, doesn't load full rows. */
 export function listBrandNames() {
-  return db.brand
-    .findMany({ select: { name: true }, orderBy: { name: "asc" } })
-    .then((rows) => rows.map((r) => r.name))
-    .catch(() => Array.from(new Set(FALLBACK_PRODUCTS.map((p) => p.brand))).sort());
+  return Promise.resolve([FARMASI_BRAND]);
 }
 
 export function findProductById(id: string) {
   return db.product
     .findUnique({ where: { id } })
-    .then((product) => (product && !shouldExcludeProduct(product) ? cleanDbProduct(product) : null))
+    .then((product) => (product && isCatalogProduct(product) && !shouldExcludeProduct(product) ? cleanDbProduct(product) : null))
     .catch(() => FALLBACK_PRODUCTS.find((product) => product.id === id) ?? null);
 }
 
 export function findProductBySlug(slug: string) {
   return db.product
     .findUnique({ where: { slug } })
-    .then((product) => (product && !shouldExcludeProduct(product) ? cleanDbProduct(product) : null))
+    .then((product) => (product && isCatalogProduct(product) && !shouldExcludeProduct(product) ? cleanDbProduct(product) : null))
     .catch(() => FALLBACK_PRODUCTS.find((product) => product.slug === slug) ?? null);
 }
 
 /** A few catalog products that contain a given tracked active — for the ingredient page. */
 export function listProductsByIngredient(ingredientId: string, limit = 8) {
   return db.product
-    .findMany({ where: { ingredientIds: { has: ingredientId } }, orderBy: { name: "asc" }, take: limit })
+    .findMany({ where: { ...CATALOG_SCOPE, ingredientIds: { has: ingredientId } }, orderBy: { name: "asc" }, take: limit })
     .then((products) => products.filter((product) => !shouldExcludeProduct(product)).map(cleanDbProduct))
     .catch(() =>
       FALLBACK_PRODUCTS.filter((product) => product.ingredientIds.includes(ingredientId)).slice(0, limit)
@@ -143,14 +164,14 @@ export function listProductsByIngredient(ingredientId: string, limit = 8) {
 /** Exact lookup by EAN/UPC barcode. Returns null when unknown or DB unavailable. */
 export function findProductByBarcode(barcode: string) {
   return db.product
-    .findFirst({ where: { barcode } })
+    .findFirst({ where: { ...CATALOG_SCOPE, barcode } })
     .then((product) => (product && !shouldExcludeProduct(product) ? cleanDbProduct(product) : null))
     .catch(() => null);
 }
 
 export function findProductsByIds(ids: string[]) {
   return db.product
-    .findMany({ where: { id: { in: ids } } })
+    .findMany({ where: { ...CATALOG_SCOPE, id: { in: ids } } })
     .then((products) => products.filter((product) => !shouldExcludeProduct(product)).map(cleanDbProduct))
     .catch(() => FALLBACK_PRODUCTS.filter((product) => ids.includes(product.id)));
 }

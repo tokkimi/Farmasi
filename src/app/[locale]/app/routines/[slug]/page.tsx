@@ -9,6 +9,7 @@ import { GuideProductAdd } from "@/components/guide-product-add";
 import { findGuide, stepsForSlot, type GuideStep } from "@/lib/routine-guides";
 import { findIngredient } from "@/data/ingredients";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 
 type SuggestedProduct = {
   id: string;
@@ -25,8 +26,8 @@ async function productsForGuide(steps: GuideStep[]) {
 
   for (const step of steps) {
     const exactWhere = step.activeId
-      ? { category: step.category, ingredientIds: { has: step.activeId } }
-      : { category: step.category };
+      ? { ...CATALOG_SCOPE, category: step.category, ingredientIds: { has: step.activeId } }
+      : { ...CATALOG_SCOPE, category: step.category };
     let products = await db.product.findMany({
       where: exactWhere,
       orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
@@ -36,7 +37,7 @@ async function productsForGuide(steps: GuideStep[]) {
 
     if (products.length === 0 && step.activeId) {
       products = await db.product.findMany({
-        where: { ingredientIds: { has: step.activeId } },
+        where: { ...CATALOG_SCOPE, ingredientIds: { has: step.activeId } },
         orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
         take: 6,
         select: { id: true, slug: true, name: true, brand: true, category: true, imageUrl: true },
@@ -45,7 +46,7 @@ async function productsForGuide(steps: GuideStep[]) {
 
     if (products.length === 0) {
       products = await db.product.findMany({
-        where: { category: step.category },
+        where: { ...CATALOG_SCOPE, category: step.category },
         orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
         take: 6,
         select: { id: true, slug: true, name: true, brand: true, category: true, imageUrl: true },

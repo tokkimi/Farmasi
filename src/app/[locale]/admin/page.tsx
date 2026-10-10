@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getDashboardStats } from "@/lib/analytics";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 
 function StatTile({
   icon: Icon,
@@ -47,7 +48,7 @@ export default async function AdminOverviewPage() {
   const topProductIds = stats.topShelfProducts.map((p) => p.productId);
   const topProducts = topProductIds.length
     ? await db.product.findMany({
-        where: { id: { in: topProductIds } },
+        where: { ...CATALOG_SCOPE, id: { in: topProductIds } },
         select: { id: true, name: true, brand: true },
       })
     : [];

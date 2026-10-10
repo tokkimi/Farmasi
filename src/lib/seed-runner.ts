@@ -5,10 +5,16 @@ import { NEWS } from "@/lib/seed-data/news";
 import { CATEGORY_TREE } from "@/lib/seed-data/categories";
 import { SEED_COMPATIBILITY_RULES, SEED_INGREDIENTS } from "@/lib/seed-data/ingredients";
 import { cleanCatalogProduct, shouldExcludeProduct } from "@/lib/catalog-cleanup";
+import { FARMASI_BRAND } from "@/lib/seed-data/farmasi-catalog";
+
+// Shared database with Haru: every product-touching seeder below is scoped
+// to the Farmasi catalogue so Haru's own rows are never read or modified.
+const FARMASI_ONLY = { brand: FARMASI_BRAND };
 
 export async function seedProducts(db: PrismaClient): Promise<number> {
   await db.product.deleteMany({
     where: {
+      ...FARMASI_ONLY,
       OR: [
         { slug: { contains: "sca_clone_freegift" } },
         { brand: { in: ["GWP", "Free Gift Ghost"] } },
@@ -353,7 +359,7 @@ const REMOVED_JUNK_SLUGS = [
 ];
 
 export async function deleteOrphanedJunkProducts(db: PrismaClient): Promise<number> {
-  const result = await db.product.deleteMany({ where: { slug: { in: REMOVED_JUNK_SLUGS } } });
+  const result = await db.product.deleteMany({ where: { ...FARMASI_ONLY, slug: { in: REMOVED_JUNK_SLUGS } } });
   return result.count;
 }
 
@@ -383,7 +389,7 @@ function slugify(value: string): string {
  * touches the existing `brand` text field products still read directly.
  */
 export async function seedBrands(db: PrismaClient): Promise<number> {
-  const products = await db.product.findMany({ select: { id: true, brand: true, origin: true } });
+  const products = await db.product.findMany({ where: FARMASI_ONLY, select: { id: true, brand: true, origin: true } });
 
   const byBrand = new Map<string, { name: string; origin: string | null; productIds: string[] }>();
   for (const p of products) {
@@ -415,7 +421,7 @@ export async function seedBrands(db: PrismaClient): Promise<number> {
 /** Backfills a first ProductSource row from each product's existing officialUrl, when present. */
 export async function seedProductSources(db: PrismaClient): Promise<number> {
   const products = await db.product.findMany({
-    where: { officialUrl: { not: null } },
+    where: { ...FARMASI_ONLY, officialUrl: { not: null } },
     select: { id: true, brand: true, officialUrl: true },
   });
 
@@ -459,7 +465,7 @@ export async function seedCompatibilityRules(db: PrismaClient): Promise<number> 
 }
 
 export async function seedProductIngredients(db: PrismaClient): Promise<number> {
-  const products = await db.product.findMany({ select: { id: true, ingredientIds: true } });
+  const products = await db.product.findMany({ where: FARMASI_ONLY, select: { id: true, ingredientIds: true } });
   const validIngredients = new Set(
     (await db.ingredient.findMany({ select: { id: true } })).map((ingredient) => ingredient.id)
   );
@@ -619,7 +625,7 @@ export async function seedTestAccounts(db: PrismaClient) {
 
   // Give the premium tester a starter shelf pulled from featured products,
   // so the routine/audit/scan flows all have something to show immediately.
-  const featured = await db.product.findMany({ where: { featured: true }, take: 6 });
+  const featured = await db.product.findMany({ where: { ...FARMASI_ONLY, featured: true }, take: 6 });
   for (const product of featured) {
     await db.shelfItem.upsert({
       where: { userId_productId: { userId: premiumUser.id, productId: product.id } },

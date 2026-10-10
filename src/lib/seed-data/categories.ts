@@ -111,4 +111,12 @@ export const CATEGORY_TREE: CategoryDef[] = [
   { slug: "foot", parentSlug: null, nameEn: "Foot", nameKo: "풋", order: 103 },
   { slug: "neck", parentSlug: null, nameEn: "Neck", nameKo: "넥", order: 104 },
   { slug: "hair", parentSlug: null, nameEn: "Hair", nameKo: "헤어", order: 105 },
+
+  // Farmasi — maquillage, parfums, accessoires, soins personnels
+  { slug: "face-makeup", parentSlug: null, nameEn: "Complexion", nameKo: "베이스 메이크업", order: 110 },
+  { slug: "eye-makeup", parentSlug: null, nameEn: "Eyes", nameKo: "아이 메이크업", order: 112 },
+  { slug: "lip-makeup", parentSlug: null, nameEn: "Lips", nameKo: "립 메이크업", order: 114 },
+  { slug: "fragrance", parentSlug: null, nameEn: "Fragrance", nameKo: "향수", order: 120 },
+  { slug: "oral-care", parentSlug: null, nameEn: "Oral care", nameKo: "구강 케어", order: 125 },
+  { slug: "accessories", parentSlug: null, nameEn: "Accessories", nameKo: "액세서리", order: 130 },
 ];

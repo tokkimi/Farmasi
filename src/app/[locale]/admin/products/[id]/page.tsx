@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 import { ProductForm } from "@/components/admin/product-form";
 import { ProductDeleteButton } from "@/components/admin/product-delete-button";
 
@@ -9,7 +10,7 @@ export default async function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await db.product.findUnique({ where: { id } });
+  const product = await db.product.findFirst({ where: { ...CATALOG_SCOPE, id } });
   if (!product) notFound();
 
   return (

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { shelfItemSchema } from "@/lib/validation";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
-import { findProductById } from "@/lib/products";
+import { CATALOG_SCOPE, findProductById } from "@/lib/products";
 import { logEvent } from "@/lib/events";
 
 export async function GET() {
@@ -13,7 +13,7 @@ export async function GET() {
   }
 
   const items = await db.shelfItem.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, product: CATALOG_SCOPE },
     orderBy: { addedAt: "asc" },
     include: { product: true },
   });

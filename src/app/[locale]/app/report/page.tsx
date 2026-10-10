@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { redirect } from "@/i18n/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 import { Card } from "@/components/ui/card";
 import { PrintReportButton } from "@/components/print-report-button";
 import { analyzeExposure } from "@/lib/ingredient-exposure";
@@ -81,11 +82,12 @@ export default async function ReportPage() {
       include: { product: { select: { name: true } } },
     }),
     db.shelfItem.findMany({
-      where: { userId },
+      where: { userId, product: CATALOG_SCOPE },
       include: { product: true },
     }),
-    db.userProductPreference.findMany({ where: { userId }, include: { product: true } }),
+    db.userProductPreference.findMany({ where: { userId, product: CATALOG_SCOPE }, include: { product: true } }),
     db.product.findMany({
+      where: CATALOG_SCOPE,
       take: 300,
       select: { id: true, slug: true, name: true, brand: true, category: true, skinTypes: true, concerns: true },
     }),

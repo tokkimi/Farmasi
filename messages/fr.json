@@ -24,7 +24,24 @@
   },
   "hero": {
     "kicker": "Votre peau, des repères plus précis",
-    "benefits": [{"title":"Analyse avancée","text":"Un bilan de peau lisible en quelques instants."},{"title":"Routines personnelles","text":"Des gestes adaptés à vos besoins du moment."},{"title":"Conseils experts","text":"Les repères essentiels de la K-beauty."},{"title":"Suivi en douceur","text":"Visualisez ce qui évolue dans votre routine."}],
+    "benefits": [
+      {
+        "title": "Analyse avancée",
+        "text": "Un bilan de peau lisible en quelques instants."
+      },
+      {
+        "title": "Routines personnelles",
+        "text": "Des gestes adaptés à vos besoins du moment."
+      },
+      {
+        "title": "Conseils experts",
+        "text": "Les repères essentiels de la K-beauty."
+      },
+      {
+        "title": "Suivi en douceur",
+        "text": "Visualisez ce qui évolue dans votre routine."
+      }
+    ],
     "badge": "Inspiré des routines K-beauty",
     "titleLine1": "Votre routine skincare,",
     "titleLine2": "enfin décodée.",
@@ -44,9 +61,9 @@
     "eyebrow": "Le cœur de Haru",
     "title": "Des produits beauté faciles à comparer",
     "subtitle": "Parcourez les fiches produit avec origine, composition, type de peau, usage et fréquence.",
-    "latestTitle": "Nouveautés",
-    "koreaTitle": "Made in Korea",
-    "koreaSubtitle": "Les essentiels K-beauty derrière nos routines",
+    "latestTitle": "Le catalogue Farmasi",
+    "koreaTitle": "Maquillage",
+    "koreaSubtitle": "Lèvres, yeux et teint — chaque teinte s'essaie en direct",
     "seeAll": "Tout voir",
     "browseAllCta": "Parcourir les produits"
   },
@@ -702,7 +719,13 @@
     "foot": "Pieds",
     "neck": "Cou",
     "hair": "Cheveux",
-    "treatment": "Traitement"
+    "treatment": "Traitement",
+    "face-makeup": "Teint",
+    "eye-makeup": "Yeux",
+    "lip-makeup": "Lèvres",
+    "fragrance": "Parfum",
+    "oral-care": "Soin bucco-dentaire",
+    "accessories": "Accessoires"
   },
   "skinTypes": {
     "oily": "Grasse",

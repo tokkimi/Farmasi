@@ -9,6 +9,11 @@ import {
   Droplet,
   Sun,
   Package,
+  Palette,
+  Heart,
+  Brush,
+  SprayCan,
+  Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { categoryParent } from "@/lib/categories";
@@ -29,6 +34,13 @@ const CATEGORY_STYLE: Record<
   moisturizer: { icon: CloudDrizzle, className: "from-accent/35 via-accent/10 to-transparent text-accent-foreground" },
   oil: { icon: Droplet, className: "from-am/30 via-accent/10 to-transparent text-am-foreground" },
   sunscreen: { icon: Sun, className: "from-am/40 via-am/12 to-transparent text-am-foreground" },
+  "face-makeup": { icon: Palette, className: "from-accent/35 via-am/10 to-transparent text-accent-foreground" },
+  "eye-makeup": { icon: Eye, className: "from-pm/30 via-pm/10 to-transparent text-pm" },
+  "lip-makeup": { icon: Heart, className: "from-destructive/25 via-primary/10 to-transparent text-primary" },
+  "lip-care": { icon: Heart, className: "from-primary/25 via-primary/8 to-transparent text-primary" },
+  fragrance: { icon: SprayCan, className: "from-primary/30 via-accent/10 to-transparent text-primary" },
+  accessories: { icon: Brush, className: "from-muted via-am/10 to-transparent text-am-foreground" },
+  "oral-care": { icon: Smile, className: "from-success/25 via-success/10 to-transparent text-success" },
 };
 
 export function ProductVisual({

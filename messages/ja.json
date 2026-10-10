@@ -24,7 +24,24 @@
   },
   "hero": {
     "kicker": "肌のための、もっと確かな目安",
-    "benefits": [{"title":"高度な分析","text":"短時間で肌の状態を見やすく整理します。"},{"title":"パーソナルルーティン","text":"その日の肌に合わせたステップ。"},{"title":"専門的なガイド","text":"K-beautyの大切な指標を紹介します。"},{"title":"やさしい記録","text":"ルーティンの変化を確認できます。"}],
+    "benefits": [
+      {
+        "title": "高度な分析",
+        "text": "短時間で肌の状態を見やすく整理します。"
+      },
+      {
+        "title": "パーソナルルーティン",
+        "text": "その日の肌に合わせたステップ。"
+      },
+      {
+        "title": "専門的なガイド",
+        "text": "K-beautyの大切な指標を紹介します。"
+      },
+      {
+        "title": "やさしい記録",
+        "text": "ルーティンの変化を確認できます。"
+      }
+    ],
     "badge": "K-beautyルーティンにインスパイア",
     "titleLine1": "あなたのスキンケアルーティンを、",
     "titleLine2": "ついに解読。",
@@ -44,9 +61,9 @@
     "eyebrow": "Haruの核心",
     "title": "比較しやすいビューティー製品",
     "subtitle": "原産地、成分メモ、肌タイプ、使用方法、使用頻度が記載された製品情報を閲覧できます。",
-    "latestTitle": "新着",
-    "koreaTitle": "Made in Korea",
-    "koreaSubtitle": "私たちのルーティンを支えるK-beautyの必需品",
+    "latestTitle": "ファルマシ カタログ",
+    "koreaTitle": "メイクアップ",
+    "koreaSubtitle": "リップ・アイ・ベース — 全色をライブで試せます",
     "seeAll": "すべて見る",
     "browseAllCta": "製品を見る"
   },
@@ -702,7 +719,13 @@
     "foot": "フット",
     "neck": "首",
     "hair": "ヘア",
-    "treatment": "トリートメント"
+    "treatment": "トリートメント",
+    "face-makeup": "ベースメイク",
+    "eye-makeup": "アイメイク",
+    "lip-makeup": "リップメイク",
+    "fragrance": "フレグランス",
+    "oral-care": "オーラルケア",
+    "accessories": "アクセサリー"
   },
   "skinTypes": {
     "oily": "オイリー肌",

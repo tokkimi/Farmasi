@@ -50,6 +50,7 @@ const OFFICIAL_HOSTS_BY_BRAND: Record<string, string[]> = {
   "emma lewisham": ["emmalewisham.com"],
   "etude": ["etudehouse.com", "www.etudehouse.com"],
   "experiment": ["experimentbeauty.com"],
+  "farmasi": ["farmasius.com", "www.farmasius.com", "farmasi.fr", "www.farmasi.fr"],
   "farmacy": ["farmacybeauty.com", "www.farmacybeauty.com"],
   "fenty skin": ["fentybeauty.com"],
   "first aid beauty": ["firstaidbeauty.com", "www.firstaidbeauty.com"],
@@ -220,6 +221,9 @@ function brandFromSlug(slug: string): string | null {
 }
 
 export function shouldExcludeProduct(product: CatalogLike): boolean {
+  // Le catalogue Farmasi est sélectionné à la main : maquillage, parfums et
+  // soins personnels sont des produits légitimes ici, jamais filtrés.
+  if (product.brand === "Farmasi") return false;
   const name = product.name.trim();
   const text = `${product.slug} ${name} ${product.brand} ${product.description ?? ""}`.toLowerCase();
   return (

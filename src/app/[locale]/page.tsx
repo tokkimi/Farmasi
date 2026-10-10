@@ -15,6 +15,7 @@ import { KBeautyRoutineBuilder } from "@/components/marketing/kbeauty-routine-bu
 import { BeautyNews } from "@/components/marketing/beauty-news";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 import { getRecentNews } from "@/lib/news-queries";
 import { getSeoMetadata } from "@/lib/seo";
 import { PRODUCTS } from "@/lib/seed-data/products";
@@ -22,9 +23,9 @@ import type { Product } from "@/generated/prisma/client";
 
 const FALLBACK_DATE = new Date("2027-01-01T00:00:00.000Z");
 
-function fallbackProducts(filter?: (product: (typeof PRODUCTS)[number]) => boolean): Product[] {
+function fallbackProducts(filter?: (product: (typeof PRODUCTS)[number]) => boolean, limit = 10): Product[] {
   return PRODUCTS.filter(filter ?? (() => true))
-    .slice(0, 10)
+    .slice(0, limit)
     .map((product) => ({
       id: product.slug,
       slug: product.slug,
@@ -51,44 +52,41 @@ function fallbackProducts(filter?: (product: (typeof PRODUCTS)[number]) => boole
 }
 
 async function getHomeProducts() {
-  // Prefer products that actually carry a real (official) product photo so the
-  // home strips are full of genuine imagery, not category swatches.
-  const withImage = { imageUrl: { startsWith: "http" } };
   const routineSlugs = [
-    "round-lab-birch-juice-moisturizing-cleanser",
-    "cosrx-advanced-snail-96-mucin-power-essence",
-    "skin1004-madagascar-centella-ampoule",
-    "beauty-of-joseon-relief-sun",
-    "cosrx-low-ph-good-morning-gel-cleanser",
-    "round-lab-1025-dokdo-toner",
-    "cosrx-bha-blackhead-power-liquid",
-    "round-lab-birch-juice-moisturizing-sun-cream-spf50",
-    "beauty-of-joseon-green-plum-refreshing-toner",
-    "round-lab-vita-niacinamide-dark-spot-serum",
-    "beauty-of-joseon-glow-serum-propolis-niacinamide",
+    "farmasi-dr-c-tuna-resurface-refining-cleanser",
+    "farmasi-dr-c-tuna-resurface-hydrasooth-essence",
+    "farmasi-dr-c-tuna-resurface-retinol-reviving-serum",
+    "farmasi-dr-c-tuna-resurface-reset-night-cream",
+    "farmasi-dr-c-tuna-age-reversist-exfoliating-cleanser",
+    "farmasi-dr-c-tuna-age-reversist-beauty-essence-tonic",
+    "farmasi-dr-c-tuna-resurface-advanced-eye-cream",
+    "farmasi-dr-c-tuna-resurface-essential-day-cream",
+    "farmasi-vfx-pro-blur-primer",
+    "farmasi-vfx-pro-camera-ready-foundation",
+    "farmasi-blush-stick",
+    "farmasi-vfx-pro-time-locker-fixing-spray",
   ];
-  const [latest, madeInKorea, routinePicks] = await Promise.all([
+  const makeupCategories = ["lip-makeup", "eye-makeup", "face-makeup"];
+  const [latest, makeup, routinePicks] = await Promise.all([
     db.product
-      .findMany({ where: withImage, orderBy: { createdAt: "desc" }, take: 12 })
+      .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 12 })
       .catch(() => []),
     db.product
       .findMany({
-        where: { origin: "South Korea", ...withImage },
+        where: { ...CATALOG_SCOPE, category: { in: makeupCategories } },
         orderBy: { featured: "desc" },
         take: 12,
       })
       .catch(() => []),
-    db.product.findMany({ where: { slug: { in: routineSlugs } } }).catch(() => []),
+    db.product.findMany({ where: { ...CATALOG_SCOPE, slug: { in: routineSlugs } } }).catch(() => []),
   ]);
 
   return {
-    latest: latest.length ? latest : fallbackProducts(),
-    madeInKorea: madeInKorea.length
-      ? madeInKorea
-      : fallbackProducts((product) => product.origin === "South Korea"),
+    latest: latest.length ? latest : fallbackProducts((product) => !!product.featured || product.category !== "accessories"),
+    makeup: makeup.length ? makeup : fallbackProducts((product) => makeupCategories.includes(product.category)),
     routinePicks: routinePicks.length
       ? routinePicks
-      : fallbackProducts((product) => routineSlugs.includes(product.slug)),
+      : fallbackProducts((product) => routineSlugs.includes(product.slug), routineSlugs.length),
   };
 }
 
@@ -133,7 +131,7 @@ export default async function Home({
 
 async function HomeProducts() {
   const products = await getHomeProducts();
-  return <ProductShowcase latest={products.latest} madeInKorea={products.madeInKorea} />;
+  return <ProductShowcase latest={products.latest} madeInKorea={products.makeup} />;
 }
 
 async function HomeRoutineBuilder() {

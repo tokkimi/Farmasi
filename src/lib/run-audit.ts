@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 import { auditRoutine, type AuditLocale, type AuditResult } from "@/lib/audit-engine";
 
 /**
@@ -9,7 +10,7 @@ import { auditRoutine, type AuditLocale, type AuditResult } from "@/lib/audit-en
 export async function runUserAudit(userId: string, locale: AuditLocale = "en"): Promise<AuditResult> {
   const [profile, shelfItems] = await Promise.all([
     db.skinProfile.findUnique({ where: { userId } }),
-    db.shelfItem.findMany({ where: { userId }, include: { product: true } }),
+    db.shelfItem.findMany({ where: { userId, product: CATALOG_SCOPE }, include: { product: true } }),
   ]);
 
   const shelf = shelfItems.map((i) => i.product);
@@ -17,7 +18,7 @@ export async function runUserAudit(userId: string, locale: AuditLocale = "en"): 
 
   const catalog = shelfCategories.length
     ? await db.product.findMany({
-        where: { category: { in: shelfCategories } },
+        where: { ...CATALOG_SCOPE, category: { in: shelfCategories } },
         select: { id: true, slug: true, name: true, brand: true, category: true, skinTypes: true, concerns: true },
       })
     : [];

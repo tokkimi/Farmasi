@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { rateLimit, clientKey } from "@/lib/rate-limit";
 import { cleanCatalogProduct, shouldExcludeProduct } from "@/lib/catalog-cleanup";
+import { FARMASI_BRAND } from "@/lib/seed-data/farmasi-catalog";
 
 export async function GET(request: Request) {
   const { ok } = rateLimit(clientKey(request, "setup-clean-products"), { limit: 10, windowMs: 60 * 1000 });
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
   const take = Math.min(1000, Math.max(1, Number(url.searchParams.get("limit") ?? 500)));
   const cursor = url.searchParams.get("cursor");
   const products = await db.product.findMany({
-    where: cursor ? { id: { gt: cursor } } : undefined,
+    // Shared database with Haru: only ever touch Farmasi rows.
+    where: { brand: FARMASI_BRAND, ...(cursor ? { id: { gt: cursor } } : {}) },
     orderBy: { id: "asc" },
     take,
   });

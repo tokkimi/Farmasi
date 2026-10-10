@@ -110,7 +110,7 @@ export function ProductForm({ product }: { product?: Product }) {
           <Input name="name" defaultValue={product?.name} required />
         </Field>
         <Field label="Brand">
-          <Input name="brand" defaultValue={product?.brand} required />
+          <Input name="brand" defaultValue={product?.brand ?? "Farmasi"} required />
         </Field>
         <Field label="Origin (brand HQ / country)">
           <Input name="origin" defaultValue={product?.origin ?? ""} />

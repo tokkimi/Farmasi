@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductVisual } from "@/components/product-visual";
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 
 export default async function AdminProductsPage() {
-  const products = await db.product.findMany({ orderBy: { name: "asc" } });
+  const products = await db.product.findMany({ where: CATALOG_SCOPE, orderBy: { name: "asc" } });
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { CATALOG_SCOPE } from "@/lib/products";
 
 export async function getDashboardStats() {
   const now = new Date();
@@ -23,9 +24,9 @@ export async function getDashboardStats() {
     db.user.count(),
     db.user.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
     db.user.count({ where: { subscriptionStatus: { in: ["ACTIVE", "TRIALING"] } } }),
-    db.product.count(),
+    db.product.count({ where: CATALOG_SCOPE }),
     db.newsItem.count(),
-    db.shelfItem.count(),
+    db.shelfItem.count({ where: { product: CATALOG_SCOPE } }),
     db.newsletterSubscriber.count(),
     db.event.groupBy({
       by: ["type"],
@@ -37,13 +38,14 @@ export async function getDashboardStats() {
       select: { createdAt: true },
     }),
     Promise.all([
-      db.product.count({ where: { OR: [{ imageUrl: null }, { imageUrl: "" }] } }),
-      db.product.count({ where: { OR: [{ fullIngredients: null }, { fullIngredients: "" }] } }),
-      db.product.count({ where: { usageSteps: { isEmpty: true } } }),
-      db.product.count({ where: { OR: [{ officialUrl: null }, { officialUrl: "" }] } }),
+      db.product.count({ where: { ...CATALOG_SCOPE, OR: [{ imageUrl: null }, { imageUrl: "" }] } }),
+      db.product.count({ where: { ...CATALOG_SCOPE, OR: [{ fullIngredients: null }, { fullIngredients: "" }] } }),
+      db.product.count({ where: { ...CATALOG_SCOPE, usageSteps: { isEmpty: true } } }),
+      db.product.count({ where: { ...CATALOG_SCOPE, OR: [{ officialUrl: null }, { officialUrl: "" }] } }),
     ]),
     db.shelfItem.groupBy({
       by: ["productId"],
+      where: { product: CATALOG_SCOPE },
       _count: { productId: true },
       orderBy: { _count: { productId: "desc" } },
       take: 8,
