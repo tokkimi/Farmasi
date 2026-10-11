@@ -162,13 +162,18 @@ function paintEyeshadow(ctx: CanvasRenderingContext2D, lidPts: Point[], browPts:
   ctx.beginPath();
   path(ctx, [...lidPts, ...[...top].reverse()]);
   ctx.clip();
-  // A pair of diffuse fields blends into the lid instead of drawing a band
-  // between two landmark polylines.
-  paintFeatheredSpot(ctx, center, lidWidth * 0.64, lidHeight * 1.25, colors[0], 0.62 * intensity);
+  // The pigment is dense at the mobile lid, then melts out toward the crease.
+  // This keeps palettes visible while avoiding the old graphic, hard-edged band.
+  ctx.globalCompositeOperation = "multiply";
+  paintFeatheredSpot(ctx, center, lidWidth * 0.66, lidHeight * 1.3, colors[0], 0.84 * intensity);
   if (colors.length > 1) {
     const accent = lerp(lidPts[0], lidPts[lidPts.length - 1], 0.22);
-    paintFeatheredSpot(ctx, accent, lidWidth * 0.44, lidHeight * 1.1, colors[1], 0.44 * intensity);
+    paintFeatheredSpot(ctx, accent, lidWidth * 0.45, lidHeight * 1.08, colors[1], 0.62 * intensity);
   }
+  // A smaller, translucent centre field mimics the light-catching density of
+  // pressed powder on the moving lid rather than a flat colour filter.
+  ctx.globalCompositeOperation = "soft-light";
+  paintFeatheredSpot(ctx, lerp(center, lidPts[Math.floor(lidPts.length / 2)], 0.3), lidWidth * 0.34, lidHeight * 0.58, colors[2] ?? colors[0], 0.46 * intensity);
   ctx.restore();
 }
 
