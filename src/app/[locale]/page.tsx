@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Hero } from "@/components/marketing/hero";
 import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
+import { WellnessShowcase } from "@/components/marketing/wellness-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
 import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
@@ -97,6 +98,7 @@ export default async function Home({
         <Hero />
         <ScanShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
+        <WellnessShowcase />
         <AuditShowcase />
         <VideoGalleryPreview />
         <SubscriptionPreview />
