@@ -16,7 +16,7 @@ import { KBeautyRoutineBuilder } from "@/components/marketing/kbeauty-routine-bu
 import { BeautyNews } from "@/components/marketing/beauty-news";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { db } from "@/lib/db";
-import { CATALOG_SCOPE } from "@/lib/products";
+import { CATALOG_SCOPE, hydrateCatalogProduct } from "@/lib/products";
 import { getRecentNews } from "@/lib/news-queries";
 import { getSeoMetadata } from "@/lib/seo";
 import { PRODUCTS } from "@/lib/seed-data/products";
@@ -83,10 +83,10 @@ async function getHomeProducts() {
   ]);
 
   return {
-    latest: latest.length ? latest : fallbackProducts((product) => !!product.featured || product.category !== "accessories"),
-    makeup: makeup.length ? makeup : fallbackProducts((product) => makeupCategories.includes(product.category)),
+    latest: latest.length ? latest.map(hydrateCatalogProduct) : fallbackProducts((product) => !!product.featured || product.category !== "accessories"),
+    makeup: makeup.length ? makeup.map(hydrateCatalogProduct) : fallbackProducts((product) => makeupCategories.includes(product.category)),
     routinePicks: routinePicks.length
-      ? routinePicks
+      ? routinePicks.map(hydrateCatalogProduct)
       : fallbackProducts((product) => routineSlugs.includes(product.slug), routineSlugs.length),
   };
 }
@@ -140,7 +140,7 @@ async function HomeShop() {
   const products = await db.product
     .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { name: "asc" }] })
     .catch(() => []);
-  return <ShopSection products={products.length ? products : fallbackProducts(undefined, PRODUCTS.length)} />;
+  return <ShopSection products={products.length ? products.map(hydrateCatalogProduct) : fallbackProducts(undefined, PRODUCTS.length)} />;
 }
 
 async function HomeRoutineBuilder() {

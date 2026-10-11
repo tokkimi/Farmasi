@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, Droplets, ListChecks, ScanFace, Sparkles } from "lucide-react";
+import { ArrowRight, Camera, Droplets, Eye, ListChecks, ScanFace, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 const CHECK_ICONS = [Camera, ListChecks, Droplets, Sparkles];
@@ -10,6 +10,7 @@ const CHECK_ICONS = [Camera, ListChecks, Droplets, Sparkles];
 export function ScanShowcase() {
   const t = useTranslations("scanShowcase");
   const faceScan = useTranslations("faceScanPage");
+  const shop = useTranslations("shop");
   const checks = t.raw("checks") as { title: string; text: string }[];
 
   return (
@@ -30,13 +31,17 @@ export function ScanShowcase() {
               </p>
               <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">{faceScan("title")}</h2>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-white/72">{t("subtitle")}</p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/app/face-scan" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-7 text-base font-semibold text-[#20191a] transition hover:bg-[#fff4f1]">
-                  <ScanFace className="size-5" aria-hidden="true" />
-                  {faceScan("title")}
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                <Link href="/app/try-on" className="group inline-flex min-h-16 items-center justify-center gap-2 rounded-[1.2rem] bg-gradient-to-r from-[#ffcfdd] via-[#ed9db7] to-[#b86b91] px-6 text-base font-bold text-[#2a101c] shadow-[0_12px_32px_rgba(255,142,184,.28)] transition hover:-translate-y-0.5 hover:brightness-105">
+                  <Sparkles className="size-5 transition group-hover:rotate-12" aria-hidden="true" />
+                  {shop("tryOnCta")}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
-                <Link href="/app/scan" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 text-base font-medium text-white transition hover:bg-white/10">
+                <Link href="/app/face-scan" className="inline-flex min-h-16 items-center justify-center gap-2 rounded-[1.2rem] border border-white/25 bg-white/8 px-6 text-base font-semibold text-white transition hover:bg-white/14">
+                  <ScanFace className="size-5" aria-hidden="true" />
+                  {faceScan("title")}
+                </Link>
+                <Link href="/app/scan" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-transparent px-5 text-sm font-medium text-white/82 transition hover:bg-white/10 sm:col-span-2">
                   <Camera className="size-4" aria-hidden="true" />
                   {t("ctaPrimary")}
                 </Link>
@@ -51,6 +56,14 @@ export function ScanShowcase() {
                 <div className="flex items-center justify-between text-xs text-white/70"><span>Analyse assistée</span><span className="text-[#ffd0c8]">Prête à démarrer</span></div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15"><div className="h-full w-2/3 rounded-full bg-[#ffc1b6]" /></div>
               </div>
+              <Link href="/app/try-on" className="absolute left-4 right-4 top-5 overflow-hidden rounded-2xl border border-[#ffd7e5]/45 bg-[#3a1829e8] p-3 shadow-xl transition hover:scale-[1.02]" aria-label={shop("tryOnCta")}>
+                <div className="absolute -right-6 -top-8 size-24 rounded-full bg-[#ee9bbc]/35 blur-2xl" aria-hidden="true" />
+                <div className="relative flex items-center gap-3">
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-[#ffd5e3] text-[#62223e]"><Eye className="size-5" aria-hidden="true" /></span>
+                  <span className="min-w-0"><span className="block text-sm font-bold text-white">{shop("tryOnCta")}</span><span className="block text-xs text-white/65">Live · lèvres · teint · yeux</span></span>
+                  <Sparkles className="ml-auto size-4 text-[#ffd3e1]" aria-hidden="true" />
+                </div>
+              </Link>
             </div>
           </div>
         </motion.div>

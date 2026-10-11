@@ -49,8 +49,23 @@ const FALLBACK_PRODUCTS = PRODUCTS.filter((product) => !shouldExcludeProduct(pro
   .map((product) => toFallbackProduct(cleanCatalogProduct(product)))
   .sort((a, b) => a.name.localeCompare(b.name));
 
+const FALLBACK_BY_SLUG = new Map(FALLBACK_PRODUCTS.map((product) => [product.slug, product]));
+
 function cleanDbProduct(product: Product): Product {
-  return cleanCatalogProduct(product);
+  return hydrateCatalogProduct(product);
+}
+
+/**
+ * Product rows can predate a catalogue photo import.  Keep their database
+ * data, but fill an empty image slot from the versioned Farmasi catalogue so
+ * a previously seeded row never hides a verified local packshot.
+ */
+export function hydrateCatalogProduct(product: Product): Product {
+  const catalogueProduct = FALLBACK_BY_SLUG.get(product.slug);
+  return cleanCatalogProduct({
+    ...product,
+    imageUrl: product.imageUrl ?? catalogueProduct?.imageUrl ?? null,
+  });
 }
 
 export function getFallbackProducts() {
