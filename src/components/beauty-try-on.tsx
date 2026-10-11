@@ -78,6 +78,94 @@ function softFilter(ctx: CanvasRenderingContext2D, px: number) {
   if ("filter" in ctx) ctx.filter = px > 0 ? `blur(${px}px)` : "none";
 }
 
+/**
+ * Draw a feathered colour field rather than a hard ellipse.  Canvas radial
+ * gradients are circular, so we scale the coordinate system to get a natural
+ * cheek/temple shape without leaving a visible edge on the skin.
+ */
+function paintFeatheredSpot(
+  ctx: CanvasRenderingContext2D,
+  center: Point,
+  rx: number,
+  ry: number,
+  color: string,
+  alpha: number,
+  rotation = 0,
+) {
+  ctx.save();
+  ctx.translate(center.x, center.y);
+  ctx.rotate(rotation);
+  ctx.scale(rx, ry);
+  const gradient = ctx.createRadialGradient(0, 0, 0.05, 0, 0, 1);
+  gradient.addColorStop(0, hexToRgba(color, alpha));
+  gradient.addColorStop(0.42, hexToRgba(color, alpha * 0.62));
+  gradient.addColorStop(0.76, hexToRgba(color, alpha * 0.18));
+  gradient.addColorStop(1, hexToRgba(color, 0));
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(0, 0, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** A soft, buildable sweep used for contour instead of two visible stripes. */
+function paintContourSweep(ctx: CanvasRenderingContext2D, from: Point, control: Point, to: Point, width: number, color: string, alpha: number) {
+  for (const [multiplier, opacity] of [[1.8, 0.07], [1.2, 0.11], [0.72, 0.16]] as const) {
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    ctx.strokeStyle = hexToRgba(color, alpha * opacity);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = width * multiplier;
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.quadraticCurveTo(control.x, control.y, to.x, to.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function fillFaceBase(ctx: CanvasRenderingContext2D, lm: Point[], shade: string, intensity: number) {
+  const P = (i: number) => lm[i];
+  // The face mask deliberately cuts out eyes and mouth before compositing. It
+  // avoids the grey/black halo that a blurred full-face overlay created around
+  // those openings with darker foundation shades.
+  ctx.save();
+  ctx.beginPath();
+  path(ctx, FACE_OVAL.map(P));
+  path(ctx, LEFT_EYE.map(P));
+  path(ctx, RIGHT_EYE.map(P));
+  path(ctx, LIPS_OUTER.map(P));
+  ctx.clip("evenodd");
+  ctx.globalCompositeOperation = "soft-light";
+  ctx.fillStyle = hexToRgba(shade, 0.3 * intensity);
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = hexToRgba(shade, 0.045 * intensity);
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.restore();
+}
+
+function paintEyeshadow(ctx: CanvasRenderingContext2D, lidPts: Point[], browPts: Point[], colors: string[], intensity: number) {
+  const top = lidPts.map((pt, i) => lerp(pt, browPts[i], 0.72));
+  const center = lidPts.reduce((sum, pt) => ({ x: sum.x + pt.x / lidPts.length, y: sum.y + pt.y / lidPts.length }), { x: 0, y: 0 });
+  const lidWidth = dist(lidPts[0], lidPts[lidPts.length - 1]);
+  const lidHeight = Math.max(2, Math.abs(top[Math.floor(top.length / 2)].y - lidPts[Math.floor(lidPts.length / 2)].y));
+
+  ctx.save();
+  ctx.beginPath();
+  path(ctx, [...lidPts, ...[...top].reverse()]);
+  ctx.clip();
+  // A pair of diffuse fields blends into the lid instead of drawing a band
+  // between two landmark polylines.
+  paintFeatheredSpot(ctx, center, lidWidth * 0.64, lidHeight * 1.25, colors[0], 0.62 * intensity);
+  if (colors.length > 1) {
+    const accent = lerp(lidPts[0], lidPts[lidPts.length - 1], 0.22);
+    paintFeatheredSpot(ctx, accent, lidWidth * 0.44, lidHeight * 1.1, colors[1], 0.44 * intensity);
+  }
+  ctx.restore();
+}
+
 function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intensity: number, scale: number) {
   const P = (i: number) => lm[i];
   const faceWidth = dist(P(234), P(454));
@@ -94,18 +182,7 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
 
     switch (area) {
       case "complexion": {
-        softFilter(ctx, blur(0.03));
-        ctx.globalCompositeOperation = "soft-light";
-        ctx.fillStyle = hexToRgba(shade.hex, 0.55 * intensity);
-        ctx.beginPath();
-        path(ctx, FACE_OVAL.map(P));
-        path(ctx, LEFT_EYE.map(P));
-        path(ctx, RIGHT_EYE.map(P));
-        path(ctx, LIPS_OUTER.map(P));
-        ctx.fill("evenodd");
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = hexToRgba(shade.hex, 0.16 * intensity);
-        ctx.fill("evenodd");
+        fillFaceBase(ctx, lm, shade.hex, intensity);
         break;
       }
       case "cheeks":
@@ -117,49 +194,36 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
             : area === "contour"
               ? [lerp(P(132), P(207), 0.55), lerp(P(361), P(427), 0.55)].map((c) => ({ c, rx: faceWidth * 0.12, ry: faceWidth * 0.05, color: colors[1] ?? colors[0], a: 0.5 }))
               : [P(117), P(346), lerp(P(6), P(4), 0.5)].map((c, i) => ({ c, rx: faceWidth * (i === 2 ? 0.03 : 0.08), ry: faceWidth * (i === 2 ? 0.09 : 0.04), color: colors[2] ?? colors[0], a: 0.6 }));
-        if (area === "highlight") ctx.globalCompositeOperation = "screen";
-        else ctx.globalCompositeOperation = "multiply";
-        softFilter(ctx, blur(0.035));
         for (const { c, rx, ry, color, a } of spots) {
-          ctx.fillStyle = hexToRgba(color, a * intensity);
-          ctx.beginPath();
-          ctx.ellipse(c.x, c.y, rx, ry, 0, 0, Math.PI * 2);
-          ctx.fill();
+          if (area === "contour") continue;
+          ctx.globalCompositeOperation = area === "highlight" ? "screen" : "source-over";
+          paintFeatheredSpot(ctx, c, rx, ry, color, a * intensity, area === "cheeks" ? -0.18 : 0);
+        }
+        if (area === "contour") {
+          const leftStart = lerp(P(132), P(50), 0.24);
+          const leftEnd = lerp(P(207), P(172), 0.58);
+          const rightStart = lerp(P(361), P(280), 0.24);
+          const rightEnd = lerp(P(427), P(397), 0.58);
+          paintContourSweep(ctx, leftStart, lerp(P(50), P(207), 0.58), leftEnd, faceWidth * 0.085, colors[1] ?? colors[0], intensity);
+          paintContourSweep(ctx, rightStart, lerp(P(280), P(427), 0.58), rightEnd, faceWidth * 0.085, colors[1] ?? colors[0], intensity);
         }
         // Palettes add their blush tone too.
         if (area === "cheeks" && colors.length > 1) {
           ctx.globalCompositeOperation = "screen";
-          ctx.fillStyle = hexToRgba(colors[2] ?? colors[0], 0.25 * intensity);
           for (const c of [P(117), P(346)]) {
-            ctx.beginPath();
-            ctx.ellipse(c.x, c.y, faceWidth * 0.06, faceWidth * 0.03, 0, 0, Math.PI * 2);
-            ctx.fill();
+            paintFeatheredSpot(ctx, c, faceWidth * 0.06, faceWidth * 0.03, colors[2] ?? colors[0], 0.25 * intensity);
           }
         }
         break;
       }
       case "eyeshadow": {
-        softFilter(ctx, blur(0.012));
         for (const [lid, brow] of [
           [LEFT_UPPER_LID, LEFT_BROW_LOWER],
           [RIGHT_UPPER_LID, RIGHT_BROW_LOWER],
         ] as const) {
           const lidPts = lid.map(P);
           const browPts = sampleAlong(brow.map(P), lidPts.length);
-          // brow lists run outer→inner, lids run outer→inner as well.
-          const layers = colors.length > 1 ? [0.55, 0.32] : [0.5];
-          layers.forEach((reach, index) => {
-            const top = lidPts.map((pt, i) => lerp(pt, browPts[i], reach));
-            const color = colors[Math.min(index + (colors.length > 1 ? 1 : 0), colors.length - 1)];
-            ctx.beginPath();
-            path(ctx, [...lidPts, ...top.reverse()]);
-            ctx.globalCompositeOperation = "multiply";
-            ctx.fillStyle = hexToRgba(color, (index === 0 ? 0.7 : 0.75) * intensity);
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
-            ctx.fillStyle = hexToRgba(color, 0.22 * intensity);
-            ctx.fill();
-          });
+          paintEyeshadow(ctx, lidPts, browPts, colors, intensity);
         }
         break;
       }
@@ -212,26 +276,33 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
           ctx.stroke();
           break;
         }
-        softFilter(ctx, blur(0.004));
+        const mouth = LIPS_OUTER.map(P);
+        const minY = Math.min(...mouth.map((point) => point.y));
+        const maxY = Math.max(...mouth.map((point) => point.y));
+        const lipGradient = ctx.createLinearGradient(0, minY, 0, maxY);
+        const baseAlpha = (area === "lipGloss" ? 0.42 : 0.7) * intensity;
+        lipGradient.addColorStop(0, hexToRgba(shade.hex, baseAlpha * 0.62));
+        lipGradient.addColorStop(0.48, hexToRgba(shade.hex, baseAlpha));
+        lipGradient.addColorStop(1, hexToRgba(shade.hex, baseAlpha * 0.74));
+        // Keep colour within the actual lip outline; a gradient over a clipped
+        // organic shape reads as pigment, not as a flat, sticker-like fill.
+        ctx.save();
         ctx.beginPath();
-        path(ctx, LIPS_OUTER.map(P));
+        path(ctx, mouth);
         path(ctx, LIPS_INNER.map(P));
-        ctx.globalCompositeOperation = "multiply";
-        ctx.fillStyle = hexToRgba(shade.hex, (area === "lipGloss" ? 0.5 : 0.78) * intensity);
-        ctx.fill("evenodd");
-        ctx.globalCompositeOperation = "source-over";
-        ctx.fillStyle = hexToRgba(shade.hex, (area === "lipGloss" ? 0.18 : 0.32) * intensity);
-        ctx.fill("evenodd");
+        ctx.clip("evenodd");
+        ctx.globalCompositeOperation = area === "lipGloss" ? "screen" : "multiply";
+        ctx.fillStyle = lipGradient;
+        ctx.fillRect(0, minY, ctx.canvas.width, maxY - minY);
         if (area === "lipGloss") {
-          // Glossy highlight on the lower lip.
+          // Two feathered reflections follow the lower lip instead of a single
+          // obvious white oval, giving shiny formulas a wet, moving-light feel.
           ctx.globalCompositeOperation = "screen";
-          softFilter(ctx, blur(0.01));
-          const c = lerp(P(14), P(17), 0.45);
-          ctx.fillStyle = `rgba(255,255,255,${0.35 * intensity})`;
-          ctx.beginPath();
-          ctx.ellipse(c.x, c.y, dist(P(61), P(291)) * 0.18, faceWidth * 0.012, 0, 0, Math.PI * 2);
-          ctx.fill();
+          const width = dist(P(61), P(291));
+          paintFeatheredSpot(ctx, lerp(P(14), P(17), 0.42), width * 0.2, faceWidth * 0.018, "#ffffff", 0.36 * intensity, -0.05);
+          paintFeatheredSpot(ctx, lerp(P(14), P(17), 0.7), width * 0.1, faceWidth * 0.011, "#ffffff", 0.24 * intensity, -0.05);
         }
+        ctx.restore();
         break;
       }
     }
