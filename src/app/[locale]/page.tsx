@@ -8,9 +8,9 @@ import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
 import { WellnessShowcase } from "@/components/marketing/wellness-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
-import { ShopSection } from "@/components/marketing/shop-section";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
 import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
+import { BeautyTryOnShowcase } from "@/components/marketing/beauty-try-on-showcase";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { db } from "@/lib/db";
 import { CATALOG_SCOPE, hydrateCatalogProduct } from "@/lib/products";
@@ -97,11 +97,11 @@ export default async function Home({
       <SiteHeader />
       <main id="main-content" className="flex-1">
         <Hero />
-        <ScanShowcase />
+        <BeautyTryOnShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeBeautyProducts /></Suspense>
+        <ScanShowcase />
         <WellnessShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeSkincareProducts /></Suspense>
-        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeShop /></Suspense>
         <AuditShowcase />
         <VideoGalleryPreview />
         <SubscriptionPreview />
@@ -120,11 +120,4 @@ async function HomeBeautyProducts() {
 async function HomeSkincareProducts() {
   const products = await getHomeProducts();
   return <ProductShowcase skincare={products.skincare} showIntro={false} />;
-}
-
-async function HomeShop() {
-  const products = await db.product
-    .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { name: "asc" }] })
-    .catch(() => []);
-  return <ShopSection products={products.length ? products.map(hydrateCatalogProduct) : fallbackProducts(undefined, PRODUCTS.length)} />;
 }
