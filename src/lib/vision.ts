@@ -3,15 +3,18 @@ import Anthropic from "@anthropic-ai/sdk";
 let client: Anthropic | null = null;
 
 export function isVisionConfigured() {
-  return !!process.env.ANTHROPIC_API_KEY;
+  return !!process.env.ANTHROPIC_API_KEY && !!process.env.ANTHROPIC_WORKSPACE_ID;
 }
 
 export function getVisionClient(): Anthropic {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is not configured");
+  if (!process.env.ANTHROPIC_API_KEY || !process.env.ANTHROPIC_WORKSPACE_ID) {
+    throw new Error("Anthropic API credentials are not configured");
   }
   if (!client) {
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      defaultHeaders: { "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID },
+    });
   }
   return client;
 }
