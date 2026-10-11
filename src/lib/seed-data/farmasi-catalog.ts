@@ -40,6 +40,20 @@ export const FARMASI_BRAND = "Farmasi";
 const ORIGIN = "Turkey";
 const URL = "https://www.farmasius.com/elevateclub";
 
+// Packshots extracted from the official Farmasi France catalogue supplied for
+// this project. Only visually verified product-to-photo matches belong here.
+const PRODUCT_IMAGE_BY_SLUG: Record<string, string> = {
+  "ultimate-shine-lip-gloss": "/catalog/ultimate-shine-lip-gloss.jpg",
+  "glowy-peptide-lip-balm": "/catalog/glowy-peptide-lip-balm.jpg",
+  "intense-lift-mascara": "/catalog/intense-lift-mascara.jpg",
+  "infinilash-mascara": "/catalog/infinilash-mascara.jpg",
+  "vfx-pro-blur-primer": "/catalog/vfx-pro-blur-primer.jpg",
+  "cc-cream-color-correct": "/catalog/cc-cream-color-correct.jpg",
+  "peach-perfect-palette": "/catalog/peach-perfect-palette.jpg",
+  "her-passion-eau-de-parfum": "/catalog/her-passion-eau-de-parfum.jpg",
+  "shooters-man-eau-de-parfum": "/catalog/shooters-man-eau-de-parfum.jpg",
+};
+
 type Def = Omit<FarmasiProduct, "brand" | "origin" | "currency" | "officialUrl" | "fullIngredients" | "codes" | "line" | "slug"> & {
   slug: string;
   codes?: string[];
@@ -55,6 +69,7 @@ function p(def: Def): FarmasiProduct {
     origin: ORIGIN,
     currency: "EUR",
     officialUrl: URL,
+    imageUrl: def.imageUrl ?? PRODUCT_IMAGE_BY_SLUG[def.slug],
     fullIngredients: def.fullIngredients ?? "",
     codes: def.codes ?? def.shades?.map((s) => s.code).filter((c): c is string => Boolean(c)) ?? [],
     line: def.line ?? "Farmasi Maquillage",

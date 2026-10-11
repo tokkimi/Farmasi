@@ -2,54 +2,57 @@
 
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { ArrowRight, Camera, Droplets, ListChecks, Sparkles } from "lucide-react";
+import { ArrowRight, Camera, Droplets, ListChecks, ScanFace, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 const CHECK_ICONS = [Camera, ListChecks, Droplets, Sparkles];
 
 export function ScanShowcase() {
   const t = useTranslations("scanShowcase");
+  const faceScan = useTranslations("faceScanPage");
   const checks = t.raw("checks") as { title: string; text: string }[];
 
   return (
-    <section className="pb-20 pt-4">
+    <section id="scanner" className="scroll-mt-24 pb-20 pt-4">
       <div className="mx-auto max-w-6xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.45 }}
-          className="mx-auto flex max-w-5xl flex-col items-center text-center"
+          className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#171313] px-6 py-8 text-white shadow-[0_24px_80px_rgba(58,28,27,.22)] sm:px-10 sm:py-12"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img loading="lazy" decoding="async" 
-            src="/scan-product-editorial.png"
-            alt=""
-            className="mb-10 block w-full max-w-[520px] object-contain"
-          />
-
-          <h2 className="text-balance text-3xl font-semibold md:text-4xl">{t("title")}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            {t("subtitle")}
-          </p>
-
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/app/scan"
-              className="inline-flex min-h-14 items-center justify-center rounded-full border border-border bg-transparent px-7 text-base font-medium text-foreground shadow-none backdrop-blur-2xl transition hover:bg-white/8"
-            >
-                {t("ctaPrimary")}
-                <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              href="/app/products"
-              className="inline-flex min-h-14 items-center justify-center rounded-full border border-border bg-transparent px-7 text-base font-medium text-foreground shadow-none backdrop-blur-2xl transition hover:bg-white/8"
-            >
-              {t("ctaSecondary")}
-            </Link>
+          <div className="absolute -right-28 -top-32 size-96 rounded-full bg-[#b87878]/30 blur-3xl" aria-hidden="true" />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.1fr_.9fr]">
+            <div className="max-w-xl text-left">
+              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium tracking-[.12em] text-white/90">
+                <Sparkles className="size-3" aria-hidden="true" /> BEAUTY TECH
+              </p>
+              <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">{faceScan("title")}</h2>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-white/72">{t("subtitle")}</p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/app/face-scan" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-7 text-base font-semibold text-[#20191a] transition hover:bg-[#fff4f1]">
+                  <ScanFace className="size-5" aria-hidden="true" />
+                  {faceScan("title")}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link href="/app/scan" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 text-base font-medium text-white transition hover:bg-white/10">
+                  <Camera className="size-4" aria-hidden="true" />
+                  {t("ctaPrimary")}
+                </Link>
+              </div>
+              <p className="mt-5 text-xs leading-relaxed text-white/52">{t("note")}</p>
+            </div>
+            <div className="relative mx-auto w-full max-w-sm">
+              <div className="absolute inset-4 rounded-[2rem] border border-[#facbc4]/50" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img loading="lazy" decoding="async" src="/skin-scanner-phone-preview.png" alt="Aperçu du scanner de peau Farmasi" className="relative mx-auto w-full drop-shadow-2xl" />
+              <div className="absolute bottom-5 left-4 right-4 rounded-2xl border border-white/15 bg-[#22191ad9] p-3 backdrop-blur">
+                <div className="flex items-center justify-between text-xs text-white/70"><span>Analyse assistée</span><span className="text-[#ffd0c8]">Prête à démarrer</span></div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15"><div className="h-full w-2/3 rounded-full bg-[#ffc1b6]" /></div>
+              </div>
+            </div>
           </div>
-
-          <p className="mt-5 text-xs leading-relaxed text-muted-foreground">{t("note")}</p>
         </motion.div>
 
         <motion.div

@@ -150,6 +150,9 @@ Vercel dashboard → Storage → Create Database → Postgres — this injects
 - `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` — to enable
   Premium billing (register the webhook endpoint as `/api/stripe/webhook`)
 - `RESEND_API_KEY`, `NEWSLETTER_FROM_EMAIL` — to enable newsletter sending
+- `ANTHROPIC_API_KEY` — required by both the product scanner and face scanner.
+  Configure this as an encrypted server-side variable in the deployment provider;
+  it must never be committed or exposed with a `NEXT_PUBLIC_` prefix.
 - `NEXT_PUBLIC_APP_URL` — your production URL (used in Stripe redirect URLs)
 
 Run `npx prisma migrate deploy` (not `migrate dev`) against the production
