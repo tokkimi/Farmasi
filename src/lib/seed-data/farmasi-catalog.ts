@@ -52,7 +52,25 @@ const PRODUCT_IMAGE_BY_SLUG: Record<string, string> = {
   "peach-perfect-palette": "/catalog/peach-perfect-palette.jpg",
   "her-passion-eau-de-parfum": "/catalog/her-passion-eau-de-parfum.jpg",
   "shooters-man-eau-de-parfum": "/catalog/shooters-man-eau-de-parfum.jpg",
+  "dr-c-tuna-resurface-refining-cleanser": "/catalog/dr-c-tuna-resurface-refining-cleanser.jpg",
+  "dr-c-tuna-resurface-hydrasooth-essence": "/catalog/dr-c-tuna-resurface-hydrasooth-essence.jpg",
+  "dr-c-tuna-resurface-retinol-reviving-serum": "/catalog/dr-c-tuna-resurface-retinol-reviving-serum.jpg",
+  "dr-c-tuna-resurface-reset-night-cream": "/catalog/dr-c-tuna-resurface-reset-night-cream.jpg",
 };
+
+// Verified against the official Farmasi US image CDN. Keep this allow-list so
+// a missing legacy image can never turn a product card into a broken image.
+const OFFICIAL_PACKSHOT_CODES = new Set([
+  "1001409", "1001387", "1001521", "1001405", "1001462", "1301518", "1301322", "1001503",
+  "1001451", "1000930", "1301292", "1001516", "1001517", "1001376", "1002024", "1001491",
+  "1001485", "1001346", "1001710", "1001705", "1002157", "1002161", "1002156", "1002163",
+  "1001519", "9000940",
+]);
+
+function officialPackshot(codes?: string[]) {
+  const code = codes?.[0];
+  return code && OFFICIAL_PACKSHOT_CODES.has(code) ? `https://content.farmasius.com/Product/${code}_400.jpg` : undefined;
+}
 
 type Def = Omit<FarmasiProduct, "brand" | "origin" | "currency" | "officialUrl" | "fullIngredients" | "codes" | "line" | "slug"> & {
   slug: string;
@@ -69,7 +87,7 @@ function p(def: Def): FarmasiProduct {
     origin: ORIGIN,
     currency: "EUR",
     officialUrl: URL,
-    imageUrl: def.imageUrl ?? PRODUCT_IMAGE_BY_SLUG[def.slug],
+    imageUrl: def.imageUrl ?? PRODUCT_IMAGE_BY_SLUG[def.slug] ?? officialPackshot(def.codes),
     fullIngredients: def.fullIngredients ?? "",
     codes: def.codes ?? def.shades?.map((s) => s.code).filter((c): c is string => Boolean(c)) ?? [],
     line: def.line ?? "Farmasi Maquillage",
