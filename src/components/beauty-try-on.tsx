@@ -108,21 +108,27 @@ function paintFeatheredSpot(
   ctx.restore();
 }
 
-/** A soft, buildable sweep used for contour instead of two visible stripes. */
-function paintContourSweep(ctx: CanvasRenderingContext2D, from: Point, control: Point, to: Point, width: number, color: string, alpha: number) {
-  for (const [multiplier, opacity] of [[1.8, 0.07], [1.2, 0.11], [0.72, 0.16]] as const) {
-    ctx.save();
-    ctx.globalCompositeOperation = "multiply";
-    ctx.strokeStyle = hexToRgba(color, alpha * opacity);
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.lineWidth = width * multiplier;
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.quadraticCurveTo(control.x, control.y, to.x, to.y);
-    ctx.stroke();
-    ctx.restore();
+/** A diffuse cheek shadow: layered skin-like clouds, never a drawn line. */
+function paintContourCloud(ctx: CanvasRenderingContext2D, center: Point, direction: number, faceWidth: number, color: string, alpha: number) {
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  const cloud = [
+    { x: 0, y: 0, rx: 0.115, ry: 0.078, a: 0.28 },
+    { x: 0.06, y: 0.012, rx: 0.08, ry: 0.065, a: 0.2 },
+    { x: -0.055, y: 0.02, rx: 0.07, ry: 0.06, a: 0.14 },
+  ];
+  for (const layer of cloud) {
+    paintFeatheredSpot(
+      ctx,
+      { x: center.x + layer.x * faceWidth * direction, y: center.y + layer.y * faceWidth },
+      faceWidth * layer.rx,
+      faceWidth * layer.ry,
+      color,
+      alpha * layer.a,
+      direction * 0.2,
+    );
   }
+  ctx.restore();
 }
 
 function fillFaceBase(ctx: CanvasRenderingContext2D, lm: Point[], shade: string, intensity: number) {
@@ -200,12 +206,9 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
           paintFeatheredSpot(ctx, c, rx, ry, color, a * intensity, area === "cheeks" ? -0.18 : 0);
         }
         if (area === "contour") {
-          const leftStart = lerp(P(132), P(50), 0.24);
-          const leftEnd = lerp(P(207), P(172), 0.58);
-          const rightStart = lerp(P(361), P(280), 0.24);
-          const rightEnd = lerp(P(427), P(397), 0.58);
-          paintContourSweep(ctx, leftStart, lerp(P(50), P(207), 0.58), leftEnd, faceWidth * 0.085, colors[1] ?? colors[0], intensity);
-          paintContourSweep(ctx, rightStart, lerp(P(280), P(427), 0.58), rightEnd, faceWidth * 0.085, colors[1] ?? colors[0], intensity);
+          // Broad oval shadows follow the cheek volume; there is intentionally no stroked curve.
+          paintContourCloud(ctx, lerp(P(132), P(207), 0.5), 1, faceWidth, colors[1] ?? colors[0], intensity);
+          paintContourCloud(ctx, lerp(P(361), P(427), 0.5), -1, faceWidth, colors[1] ?? colors[0], intensity);
         }
         // Palettes add their blush tone too.
         if (area === "cheeks" && colors.length > 1) {
