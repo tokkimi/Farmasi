@@ -47,15 +47,6 @@ const PRODUCT_IMAGE_BY_SLUG: Record<string, string> = {
   "accessoire-pinceau-illuminateur-biseaute": "/catalog/accessoire-pinceau-illuminateur-biseaute.jpg",
   "accessoire-pinceau-fond-de-teint": "/catalog/accessoire-pinceau-fond-de-teint.jpg",
   "accessoire-eponge-teint-estompeuse": "/catalog/accessoire-eponge-teint-estompeuse.jpg",
-  "ultimate-shine-lip-gloss": "/catalog/ultimate-shine-lip-gloss.jpg",
-  "glowy-peptide-lip-balm": "/catalog/glowy-peptide-lip-balm.jpg",
-  "intense-lift-mascara": "/catalog/intense-lift-mascara.jpg",
-  "infinilash-mascara": "/catalog/infinilash-mascara.jpg",
-  "vfx-pro-blur-primer": "/catalog/vfx-pro-blur-primer.jpg",
-  "cc-cream-color-correct": "/catalog/cc-cream-color-correct.jpg",
-  "peach-perfect-palette": "/catalog/peach-perfect-palette.jpg",
-  "her-passion-eau-de-parfum": "/catalog/her-passion-eau-de-parfum.jpg",
-  "shooters-man-eau-de-parfum": "/catalog/shooters-man-eau-de-parfum.jpg",
 };
 
 function officialPackshot(codes?: string[]) {

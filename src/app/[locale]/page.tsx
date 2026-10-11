@@ -8,6 +8,7 @@ import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
+import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { db } from "@/lib/db";
 import { CATALOG_SCOPE, hydrateCatalogProduct } from "@/lib/products";
@@ -97,6 +98,7 @@ export default async function Home({
         <ScanShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
         <AuditShowcase />
+        <VideoGalleryPreview />
         <SubscriptionPreview />
         <FinalCta />
       </main>
