@@ -33,15 +33,18 @@ export function ScanShowcase() {
               <p className="mt-5 max-w-lg text-base leading-relaxed text-white/72">{t("subtitle")}</p>
               <p className="mt-5 text-xs leading-relaxed text-white/52">{t("note")}</p>
             </div>
-            <div className="grid w-full gap-3 self-stretch sm:grid-cols-2 lg:grid-cols-1">
-              <Link href="/app/try-on" className="group flex min-h-40 flex-col justify-between rounded-[1.5rem] border border-[#ffd7e5]/35 bg-[#351b2b] p-6 shadow-[0_18px_45px_rgba(0,0,0,.18)] transition hover:-translate-y-1 hover:bg-[#452238]" aria-label={shop("tryOnCta")}>
+            <div className="grid w-full gap-3 self-stretch">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img loading="lazy" decoding="async" src="/scan-product-editorial.png" alt="Étagère de produits de soin" className="mx-auto h-72 w-full max-w-xs object-contain sm:h-80" />
+              <div className="grid gap-3 sm:grid-cols-2">
+              <Link href="/app/try-on" className="group flex min-h-32 flex-col justify-between rounded-[1.5rem] border border-[#ffd7e5]/35 bg-[#351b2b] p-5 shadow-[0_18px_45px_rgba(0,0,0,.18)] transition hover:-translate-y-1 hover:bg-[#452238]" aria-label={shop("tryOnCta")}>
                 <span className="flex size-11 items-center justify-center rounded-2xl bg-[#ffd5e3] text-[#62223e]"><Eye className="size-5" aria-hidden="true" /></span>
                 <span><span className="flex items-center gap-2 text-lg font-bold text-white">{shop("tryOnCta")} <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span><span className="mt-1 block text-sm text-white/65">Live · lèvres · teint · yeux</span></span>
               </Link>
-              <Link href="/app/face-scan" className="group flex min-h-40 flex-col justify-between rounded-[1.5rem] border border-white/15 bg-white/[0.07] p-6 shadow-[0_18px_45px_rgba(0,0,0,.14)] transition hover:-translate-y-1 hover:bg-white/[0.12]">
+              <Link href="/app/face-scan" className="group flex min-h-32 flex-col justify-between rounded-[1.5rem] border border-white/15 bg-white/[0.07] p-5 shadow-[0_18px_45px_rgba(0,0,0,.14)] transition hover:-translate-y-1 hover:bg-white/[0.12]">
                 <span className="flex size-11 items-center justify-center rounded-2xl bg-white/12 text-[#ffd3c7]"><ScanFace className="size-5" aria-hidden="true" /></span>
                 <span><span className="flex items-center gap-2 text-lg font-bold text-white">{faceScan("title")} <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span><span className="mt-1 block text-sm text-white/65">Analyse cosmétique guidée</span></span>
-              </Link>
+              </Link></div>
               <Link href="/app/scan" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-transparent px-5 text-sm font-medium text-white/82 transition hover:bg-white/10 sm:col-span-2 lg:col-span-1">
                 <Camera className="size-4" aria-hidden="true" />
                 {t("ctaPrimary")}
