@@ -8,6 +8,7 @@ import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
 import { WellnessShowcase } from "@/components/marketing/wellness-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
+import { ShopSection } from "@/components/marketing/shop-section";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
 import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
 import { FinalCta } from "@/components/marketing/final-cta";
@@ -99,6 +100,7 @@ export default async function Home({
         <ScanShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
         <WellnessShowcase />
+        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeShop /></Suspense>
         <AuditShowcase />
         <VideoGalleryPreview />
         <SubscriptionPreview />
@@ -112,4 +114,11 @@ export default async function Home({
 async function HomeProducts() {
   const products = await getHomeProducts();
   return <ProductShowcase makeup={products.makeup} skincare={products.skincare} />;
+}
+
+async function HomeShop() {
+  const products = await db.product
+    .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { name: "asc" }] })
+    .catch(() => []);
+  return <ShopSection products={products.length ? products.map(hydrateCatalogProduct) : fallbackProducts(undefined, PRODUCTS.length)} />;
 }
