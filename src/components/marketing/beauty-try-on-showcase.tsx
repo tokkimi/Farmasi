@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight, ScanFace } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 export function BeautyTryOnShowcase() {
@@ -14,7 +14,10 @@ export function BeautyTryOnShowcase() {
           <p className="inline-flex w-fit items-center gap-2 rounded-full border border-[#f4b7cf]/35 bg-[#28111e]/75 px-3 py-1 text-xs font-medium tracking-[.14em] text-[#ffd8e6]"><Sparkles className="size-3" /> BEAUTY VR TRY-ON</p>
           <h2 className="mt-5 text-balance font-serif text-4xl leading-[.98] text-white sm:text-6xl">Essaye ton look.<br />Vois le fini.</h2>
           <p className="mt-5 max-w-md text-base leading-7 text-white/72">Lèvres, teint et yeux : des couleurs posées en direct avec des contours doux, des textures réalistes et un rendu qui respecte chaque fini.</p>
-          <Link href="/app/try-on" className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#f5b8ce] px-6 py-3 text-sm font-bold text-[#36101f] transition hover:brightness-105">Essayer le Beauty VR <ArrowRight className="size-4" /></Link>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/app/try-on" className="inline-flex items-center gap-2 rounded-full bg-[#f5b8ce] px-6 py-3 text-sm font-bold text-[#36101f] transition hover:brightness-105">Essayer le Beauty VR <ArrowRight className="size-4" /></Link>
+            <Link href="/app/face-scan" className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-black/25 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"><ScanFace className="size-4" />Scanner mon visage <ArrowRight className="size-4" /></Link>
+          </div>
         </div>
       </div>
     </section>
