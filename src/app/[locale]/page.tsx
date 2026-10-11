@@ -98,8 +98,9 @@ export default async function Home({
       <main id="main-content" className="flex-1">
         <Hero />
         <ScanShowcase />
-        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
+        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeBeautyProducts /></Suspense>
         <WellnessShowcase />
+        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeSkincareProducts /></Suspense>
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeShop /></Suspense>
         <AuditShowcase />
         <VideoGalleryPreview />
@@ -111,9 +112,14 @@ export default async function Home({
   );
 }
 
-async function HomeProducts() {
+async function HomeBeautyProducts() {
   const products = await getHomeProducts();
-  return <ProductShowcase makeup={products.makeup} skincare={products.skincare} />;
+  return <ProductShowcase makeup={products.makeup} />;
+}
+
+async function HomeSkincareProducts() {
+  const products = await getHomeProducts();
+  return <ProductShowcase skincare={products.skincare} showIntro={false} />;
 }
 
 async function HomeShop() {

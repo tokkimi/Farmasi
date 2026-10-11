@@ -42,21 +42,23 @@ function ProductStrip({ products }: { products: Product[] }) {
 export function ProductShowcase({
   makeup,
   skincare,
+  showIntro = true,
 }: {
-  makeup: Product[];
-  skincare: Product[];
+  makeup?: Product[];
+  skincare?: Product[];
+  showIntro?: boolean;
 }) {
   const t = useTranslations("productShowcase");
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-24">
-      <div className="mx-auto mb-10 max-w-xl text-center">
+      {showIntro && <div className="mx-auto mb-10 max-w-xl text-center">
           <h2 className="text-balance text-2xl font-semibold md:text-3xl">{t("title")}</h2>
         <p className="mt-3 text-muted-foreground">{t("subtitle")}</p>
-      </div>
+      </div>}
 
       <div className="flex flex-col gap-12">
-        <div className="flex flex-col gap-4">
+        {makeup && <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Beauty VR Try-On</p>
@@ -68,9 +70,9 @@ export function ProductShowcase({
             </Link>
           </div>
           <ProductStrip products={makeup} />
-        </div>
+        </div>}
 
-        <div className="flex flex-col gap-4">
+        {skincare && <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-primary">Skin Scanner</p>
@@ -82,7 +84,7 @@ export function ProductShowcase({
             </Link>
           </div>
           <ProductStrip products={skincare} />
-        </div>
+        </div>}
       </div>
 
       <div className="mt-10 flex justify-center">
