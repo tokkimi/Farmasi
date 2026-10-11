@@ -40,43 +40,48 @@ function ProductStrip({ products }: { products: Product[] }) {
 }
 
 export function ProductShowcase({
-  latest,
-  madeInKorea,
+  makeup,
+  skincare,
 }: {
-  latest: Product[];
-  madeInKorea: Product[];
+  makeup: Product[];
+  skincare: Product[];
 }) {
   const t = useTranslations("productShowcase");
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-24">
       <div className="mx-auto mb-10 max-w-xl text-center">
-        <h2 className="text-balance text-2xl font-semibold md:text-3xl">{t("title")}</h2>
+          <h2 className="text-balance text-2xl font-semibold md:text-3xl">{t("title")}</h2>
         <p className="mt-3 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-col gap-12">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
-            <h3 className="text-xl font-semibold">{t("latestTitle")}</h3>
-            <Link href="/app/products" className="shrink-0 text-sm font-medium text-primary hover:underline">
-              {t("seeAll")}
-            </Link>
-          </div>
-          <ProductStrip products={latest} />
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
             <div>
-              <h3 className="text-xl font-semibold">{t("koreaTitle")}</h3>
-              <p className="text-sm text-muted-foreground">{t("koreaSubtitle")}</p>
+              <p className="text-sm font-medium text-primary">Beauty VR Try-On</p>
+              <h3 className="mt-1 text-xl font-semibold">{t("beautyTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("beautySubtitle")}</p>
             </div>
             <Link href="/app/products" className="shrink-0 text-sm font-medium text-primary hover:underline">
               {t("seeAll")}
             </Link>
           </div>
-          <ProductStrip products={madeInKorea} />
+          <ProductStrip products={makeup} />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-primary">Skin Scanner</p>
+              <h3 className="mt-1 text-xl font-semibold">{t("skincareTitle")}</h3>
+              <p className="text-sm text-muted-foreground">{t("skincareSubtitle")}</p>
+            </div>
+            <Link href="/app/products" className="shrink-0 text-sm font-medium text-primary hover:underline">
+              {t("seeAll")}
+            </Link>
+          </div>
+          <ProductStrip products={skincare} />
         </div>
       </div>
 

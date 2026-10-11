@@ -61,9 +61,10 @@
     "eyebrow": "The core of Haru",
     "title": "Beauty products, easy to compare",
     "subtitle": "Browse product sheets with origin, composition notes, skin type, usage and frequency.",
-    "latestTitle": "The Farmasi catalogue",
-    "koreaTitle": "Makeup",
-    "koreaSubtitle": "Lips, eyes and complexion — try every shade live",
+    "beautyTitle": "Beauty picks to try on",
+    "beautySubtitle": "Lips, eyes and complexion — try every shade live.",
+    "skincareTitle": "Recommended skincare picks",
+    "skincareSubtitle": "Farmasi essentials to discover after your skin analysis.",
     "seeAll": "See all",
     "browseAllCta": "Browse products"
   },

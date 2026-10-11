@@ -6,18 +6,11 @@ import { SiteFooter } from "@/components/site-footer";
 import { Hero } from "@/components/marketing/hero";
 import { ScanShowcase } from "@/components/marketing/scan-showcase";
 import { AuditShowcase } from "@/components/marketing/audit-showcase";
-import { WellnessShowcase } from "@/components/marketing/wellness-showcase";
 import { ProductShowcase } from "@/components/marketing/product-showcase";
-import { ShopSection } from "@/components/marketing/shop-section";
 import { SubscriptionPreview } from "@/components/marketing/subscription-preview";
-import { VideoGalleryPreview } from "@/components/marketing/video-gallery-preview";
-import { RoutineLabPreview } from "@/components/marketing/routine-lab-preview";
-import { KBeautyRoutineBuilder } from "@/components/marketing/kbeauty-routine-builder";
-import { BeautyNews } from "@/components/marketing/beauty-news";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { db } from "@/lib/db";
 import { CATALOG_SCOPE, hydrateCatalogProduct } from "@/lib/products";
-import { getRecentNews } from "@/lib/news-queries";
 import { getSeoMetadata } from "@/lib/seo";
 import { PRODUCTS } from "@/lib/seed-data/products";
 import type { Product } from "@/generated/prisma/client";
@@ -53,25 +46,9 @@ function fallbackProducts(filter?: (product: (typeof PRODUCTS)[number]) => boole
 }
 
 async function getHomeProducts() {
-  const routineSlugs = [
-    "farmasi-dr-c-tuna-resurface-refining-cleanser",
-    "farmasi-dr-c-tuna-resurface-hydrasooth-essence",
-    "farmasi-dr-c-tuna-resurface-retinol-reviving-serum",
-    "farmasi-dr-c-tuna-resurface-reset-night-cream",
-    "farmasi-dr-c-tuna-age-reversist-exfoliating-cleanser",
-    "farmasi-dr-c-tuna-age-reversist-beauty-essence-tonic",
-    "farmasi-dr-c-tuna-resurface-advanced-eye-cream",
-    "farmasi-dr-c-tuna-resurface-essential-day-cream",
-    "farmasi-vfx-pro-blur-primer",
-    "farmasi-vfx-pro-camera-ready-foundation",
-    "farmasi-blush-stick",
-    "farmasi-vfx-pro-time-locker-fixing-spray",
-  ];
   const makeupCategories = ["lip-makeup", "eye-makeup", "face-makeup"];
-  const [latest, makeup, routinePicks] = await Promise.all([
-    db.product
-      .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 12 })
-      .catch(() => []),
+  const skincareCategories = ["cleanser", "toner", "essence", "serum", "eye", "moisturizer", "lip-care"];
+  const [makeup, skincare] = await Promise.all([
     db.product
       .findMany({
         where: { ...CATALOG_SCOPE, category: { in: makeupCategories } },
@@ -79,15 +56,18 @@ async function getHomeProducts() {
         take: 12,
       })
       .catch(() => []),
-    db.product.findMany({ where: { ...CATALOG_SCOPE, slug: { in: routineSlugs } } }).catch(() => []),
+    db.product
+      .findMany({
+        where: { ...CATALOG_SCOPE, category: { in: skincareCategories } },
+        orderBy: { featured: "desc" },
+        take: 12,
+      })
+      .catch(() => []),
   ]);
 
   return {
-    latest: latest.length ? latest.map(hydrateCatalogProduct) : fallbackProducts((product) => !!product.featured || product.category !== "accessories"),
     makeup: makeup.length ? makeup.map(hydrateCatalogProduct) : fallbackProducts((product) => makeupCategories.includes(product.category)),
-    routinePicks: routinePicks.length
-      ? routinePicks.map(hydrateCatalogProduct)
-      : fallbackProducts((product) => routineSlugs.includes(product.slug), routineSlugs.length),
+    skincare: skincare.length ? skincare.map(hydrateCatalogProduct) : fallbackProducts((product) => skincareCategories.includes(product.category)),
   };
 }
 
@@ -114,16 +94,10 @@ export default async function Home({
       <SiteHeader />
       <main id="main-content" className="flex-1">
         <Hero />
-        <WellnessShowcase />
-        <RoutineLabPreview />
-        <SubscriptionPreview />
-        <VideoGalleryPreview />
         <ScanShowcase />
-        <AuditShowcase />
-        <Suspense fallback={<div className="h-[48rem]" aria-busy="true" />}><HomeRoutineBuilder /></Suspense>
-        <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeShop /></Suspense>
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeProducts /></Suspense>
-        <Suspense fallback={null}><HomeNews /></Suspense>
+        <AuditShowcase />
+        <SubscriptionPreview />
         <FinalCta />
       </main>
       <SiteFooter />
@@ -133,21 +107,5 @@ export default async function Home({
 
 async function HomeProducts() {
   const products = await getHomeProducts();
-  return <ProductShowcase latest={products.latest} madeInKorea={products.makeup} />;
-}
-
-async function HomeShop() {
-  const products = await db.product
-    .findMany({ where: CATALOG_SCOPE, orderBy: [{ featured: "desc" }, { name: "asc" }] })
-    .catch(() => []);
-  return <ShopSection products={products.length ? products.map(hydrateCatalogProduct) : fallbackProducts(undefined, PRODUCTS.length)} />;
-}
-
-async function HomeRoutineBuilder() {
-  const products = await getHomeProducts();
-  return <KBeautyRoutineBuilder products={products.routinePicks} />;
-}
-
-async function HomeNews() {
-  return <BeautyNews items={await getRecentNews(24)} />;
+  return <ProductShowcase makeup={products.makeup} skincare={products.skincare} />;
 }

@@ -61,9 +61,10 @@
     "eyebrow": "Haru의 핵심",
     "title": "뷰티 제품을 쉽게 비교하세요",
     "subtitle": "원산지, 성분 메모, 피부 타입, 사용법과 빈도가 정리된 제품 정보를 확인하세요.",
-    "latestTitle": "파르마시 카탈로그",
-    "koreaTitle": "메이크업",
-    "koreaSubtitle": "립, 아이, 베이스 — 모든 컬러를 실시간으로 테스트",
+    "beautyTitle": "가상으로 테스트할 뷰티 셀렉션",
+    "beautySubtitle": "립, 아이, 베이스 — 모든 컬러를 실시간으로 테스트하세요.",
+    "skincareTitle": "추천 스킨케어 셀렉션",
+    "skincareSubtitle": "피부 분석 후 살펴볼 Farmasi 필수 제품입니다.",
     "seeAll": "전체 보기",
     "browseAllCta": "제품 둘러보기"
   },

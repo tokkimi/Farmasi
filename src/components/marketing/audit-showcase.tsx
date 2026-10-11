@@ -24,24 +24,8 @@ export function AuditShowcase() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.45 }}
-          className="w-full"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img loading="lazy" decoding="async" 
-            src="/audit-scan-editorial.png"
-            alt=""
-            aria-hidden="true"
-            className="mx-auto block h-auto w-full max-w-5xl object-contain"
-          />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.45, delay: 0.06 }}
-          className="mx-auto mt-10 flex w-full min-w-0 max-w-3xl flex-col items-center text-center"
+          className="mx-auto flex w-full min-w-0 max-w-3xl flex-col items-center text-center"
         >
           <h2 className="text-balance text-3xl font-semibold md:text-4xl">{t("title")}</h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">{t("subtitle")}</p>

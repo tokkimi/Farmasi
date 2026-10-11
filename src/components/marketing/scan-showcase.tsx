@@ -31,38 +31,20 @@ export function ScanShowcase() {
               </p>
               <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">{faceScan("title")}</h2>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-white/72">{t("subtitle")}</p>
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                <Link href="/app/try-on" className="group inline-flex min-h-16 items-center justify-center gap-2 rounded-[1.2rem] bg-gradient-to-r from-[#ffcfdd] via-[#ed9db7] to-[#b86b91] px-6 text-base font-bold text-[#2a101c] shadow-[0_12px_32px_rgba(255,142,184,.28)] transition hover:-translate-y-0.5 hover:brightness-105">
-                  <Sparkles className="size-5 transition group-hover:rotate-12" aria-hidden="true" />
-                  {shop("tryOnCta")}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-                <Link href="/app/face-scan" className="inline-flex min-h-16 items-center justify-center gap-2 rounded-[1.2rem] border border-white/25 bg-white/8 px-6 text-base font-semibold text-white transition hover:bg-white/14">
-                  <ScanFace className="size-5" aria-hidden="true" />
-                  {faceScan("title")}
-                </Link>
-                <Link href="/app/scan" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-transparent px-5 text-sm font-medium text-white/82 transition hover:bg-white/10 sm:col-span-2">
-                  <Camera className="size-4" aria-hidden="true" />
-                  {t("ctaPrimary")}
-                </Link>
-              </div>
               <p className="mt-5 text-xs leading-relaxed text-white/52">{t("note")}</p>
             </div>
-            <div className="relative mx-auto w-full max-w-sm">
-              <div className="absolute inset-4 rounded-[2rem] border border-[#facbc4]/50" aria-hidden="true" />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async" src="/skin-scanner-phone-preview.png" alt="Aperçu du scanner de peau Farmasi" className="relative mx-auto w-full drop-shadow-2xl" />
-              <div className="absolute bottom-5 left-4 right-4 rounded-2xl border border-white/15 bg-[#22191ad9] p-3 backdrop-blur">
-                <div className="flex items-center justify-between text-xs text-white/70"><span>Analyse assistée</span><span className="text-[#ffd0c8]">Prête à démarrer</span></div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15"><div className="h-full w-2/3 rounded-full bg-[#ffc1b6]" /></div>
-              </div>
-              <Link href="/app/try-on" className="absolute left-4 right-4 top-5 overflow-hidden rounded-2xl border border-[#ffd7e5]/45 bg-[#3a1829e8] p-3 shadow-xl transition hover:scale-[1.02]" aria-label={shop("tryOnCta")}>
-                <div className="absolute -right-6 -top-8 size-24 rounded-full bg-[#ee9bbc]/35 blur-2xl" aria-hidden="true" />
-                <div className="relative flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-[#ffd5e3] text-[#62223e]"><Eye className="size-5" aria-hidden="true" /></span>
-                  <span className="min-w-0"><span className="block text-sm font-bold text-white">{shop("tryOnCta")}</span><span className="block text-xs text-white/65">Live · lèvres · teint · yeux</span></span>
-                  <Sparkles className="ml-auto size-4 text-[#ffd3e1]" aria-hidden="true" />
-                </div>
+            <div className="grid w-full gap-3 self-stretch sm:grid-cols-2 lg:grid-cols-1">
+              <Link href="/app/try-on" className="group flex min-h-40 flex-col justify-between rounded-[1.5rem] border border-[#ffd7e5]/35 bg-[#351b2b] p-6 shadow-[0_18px_45px_rgba(0,0,0,.18)] transition hover:-translate-y-1 hover:bg-[#452238]" aria-label={shop("tryOnCta")}>
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-[#ffd5e3] text-[#62223e]"><Eye className="size-5" aria-hidden="true" /></span>
+                <span><span className="flex items-center gap-2 text-lg font-bold text-white">{shop("tryOnCta")} <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span><span className="mt-1 block text-sm text-white/65">Live · lèvres · teint · yeux</span></span>
+              </Link>
+              <Link href="/app/face-scan" className="group flex min-h-40 flex-col justify-between rounded-[1.5rem] border border-white/15 bg-white/[0.07] p-6 shadow-[0_18px_45px_rgba(0,0,0,.14)] transition hover:-translate-y-1 hover:bg-white/[0.12]">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-white/12 text-[#ffd3c7]"><ScanFace className="size-5" aria-hidden="true" /></span>
+                <span><span className="flex items-center gap-2 text-lg font-bold text-white">{faceScan("title")} <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span><span className="mt-1 block text-sm text-white/65">Analyse cosmétique guidée</span></span>
+              </Link>
+              <Link href="/app/scan" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-transparent px-5 text-sm font-medium text-white/82 transition hover:bg-white/10 sm:col-span-2 lg:col-span-1">
+                <Camera className="size-4" aria-hidden="true" />
+                {t("ctaPrimary")}
               </Link>
             </div>
           </div>

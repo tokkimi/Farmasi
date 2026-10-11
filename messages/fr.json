@@ -61,9 +61,10 @@
     "eyebrow": "Le cœur de Haru",
     "title": "Des produits beauté faciles à comparer",
     "subtitle": "Parcourez les fiches produit avec origine, composition, type de peau, usage et fréquence.",
-    "latestTitle": "Le catalogue Farmasi",
-    "koreaTitle": "Maquillage",
-    "koreaSubtitle": "Lèvres, yeux et teint — chaque teinte s'essaie en direct",
+    "beautyTitle": "Sélection beauté à essayer",
+    "beautySubtitle": "Lèvres, yeux et teint — chaque teinte s'essaie en direct.",
+    "skincareTitle": "Sélection skincare recommandée",
+    "skincareSubtitle": "Les essentiels Farmasi à découvrir après votre analyse de peau.",
     "seeAll": "Tout voir",
     "browseAllCta": "Parcourir les produits"
   },

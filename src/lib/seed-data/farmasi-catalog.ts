@@ -43,6 +43,10 @@ const URL = "https://www.farmasius.com/elevateclub";
 // Packshots extracted from the official Farmasi France catalogue supplied for
 // this project. Only visually verified product-to-photo matches belong here.
 const PRODUCT_IMAGE_BY_SLUG: Record<string, string> = {
+  "accessoire-pinceau-ombreur": "/catalog/accessoire-pinceau-ombreur.jpg",
+  "accessoire-pinceau-illuminateur-biseaute": "/catalog/accessoire-pinceau-illuminateur-biseaute.jpg",
+  "accessoire-pinceau-fond-de-teint": "/catalog/accessoire-pinceau-fond-de-teint.jpg",
+  "accessoire-eponge-teint-estompeuse": "/catalog/accessoire-eponge-teint-estompeuse.jpg",
   "ultimate-shine-lip-gloss": "/catalog/ultimate-shine-lip-gloss.jpg",
   "glowy-peptide-lip-balm": "/catalog/glowy-peptide-lip-balm.jpg",
   "intense-lift-mascara": "/catalog/intense-lift-mascara.jpg",
@@ -52,24 +56,13 @@ const PRODUCT_IMAGE_BY_SLUG: Record<string, string> = {
   "peach-perfect-palette": "/catalog/peach-perfect-palette.jpg",
   "her-passion-eau-de-parfum": "/catalog/her-passion-eau-de-parfum.jpg",
   "shooters-man-eau-de-parfum": "/catalog/shooters-man-eau-de-parfum.jpg",
-  "dr-c-tuna-resurface-refining-cleanser": "/catalog/dr-c-tuna-resurface-refining-cleanser.jpg",
-  "dr-c-tuna-resurface-hydrasooth-essence": "/catalog/dr-c-tuna-resurface-hydrasooth-essence.jpg",
-  "dr-c-tuna-resurface-retinol-reviving-serum": "/catalog/dr-c-tuna-resurface-retinol-reviving-serum.jpg",
-  "dr-c-tuna-resurface-reset-night-cream": "/catalog/dr-c-tuna-resurface-reset-night-cream.jpg",
 };
-
-// Verified against the official Farmasi US image CDN. Keep this allow-list so
-// a missing legacy image can never turn a product card into a broken image.
-const OFFICIAL_PACKSHOT_CODES = new Set([
-  "1001409", "1001387", "1001521", "1001405", "1001462", "1301518", "1301322", "1001503",
-  "1001451", "1000930", "1301292", "1001516", "1001517", "1001376", "1002024", "1001491",
-  "1001485", "1001346", "1001710", "1001705", "1002157", "1002161", "1002156", "1002163",
-  "1001519", "9000940",
-]);
 
 function officialPackshot(codes?: string[]) {
   const code = codes?.[0];
-  return code && OFFICIAL_PACKSHOT_CODES.has(code) ? `https://content.farmasius.com/Product/${code}_400.jpg` : undefined;
+  // Farmasi publishes packshots by product code. ProductImage retries the PNG
+  // variant when a legacy reference has no JPG, before it shows a fallback.
+  return code ? `https://content.farmasius.com/Product/${code}_400.jpg` : undefined;
 }
 
 type Def = Omit<FarmasiProduct, "brand" | "origin" | "currency" | "officialUrl" | "fullIngredients" | "codes" | "line" | "slug"> & {
@@ -80,6 +73,7 @@ type Def = Omit<FarmasiProduct, "brand" | "origin" | "currency" | "officialUrl" 
 };
 
 function p(def: Def): FarmasiProduct {
+  const codes = def.codes ?? def.shades?.map((s) => s.code).filter((c): c is string => Boolean(c)) ?? [];
   return {
     ...def,
     slug: `farmasi-${def.slug}`,
@@ -87,9 +81,9 @@ function p(def: Def): FarmasiProduct {
     origin: ORIGIN,
     currency: "EUR",
     officialUrl: URL,
-    imageUrl: def.imageUrl ?? PRODUCT_IMAGE_BY_SLUG[def.slug] ?? officialPackshot(def.codes),
+    imageUrl: def.imageUrl ?? PRODUCT_IMAGE_BY_SLUG[def.slug] ?? officialPackshot(codes),
     fullIngredients: def.fullIngredients ?? "",
-    codes: def.codes ?? def.shades?.map((s) => s.code).filter((c): c is string => Boolean(c)) ?? [],
+    codes,
     line: def.line ?? "Farmasi Maquillage",
   };
 }

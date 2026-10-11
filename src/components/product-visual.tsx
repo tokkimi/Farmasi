@@ -61,7 +61,7 @@ export function ProductVisual({
   const sizeClasses = {
     sm: "size-12 rounded-xl",
     md: "size-16 rounded-2xl",
-    lg: "aspect-square w-full rounded-2xl",
+    lg: "aspect-[4/5] w-full rounded-2xl",
   }[size];
 
   const iconSize = { sm: "size-5", md: "size-6", lg: "size-12" }[size];

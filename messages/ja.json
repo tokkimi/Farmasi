@@ -61,9 +61,10 @@
     "eyebrow": "Haruの核心",
     "title": "比較しやすいビューティー製品",
     "subtitle": "原産地、成分メモ、肌タイプ、使用方法、使用頻度が記載された製品情報を閲覧できます。",
-    "latestTitle": "ファルマシ カタログ",
-    "koreaTitle": "メイクアップ",
-    "koreaSubtitle": "リップ・アイ・ベース — 全色をライブで試せます",
+    "beautyTitle": "バーチャルで試せるビューティーセレクション",
+    "beautySubtitle": "リップ・アイ・ベース — すべての色をライブで試せます。",
+    "skincareTitle": "おすすめスキンケアセレクション",
+    "skincareSubtitle": "肌分析の後に見つけるFarmasiの必需品です。",
     "seeAll": "すべて見る",
     "browseAllCta": "製品を見る"
   },

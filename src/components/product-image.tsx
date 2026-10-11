@@ -9,7 +9,9 @@ type ProductImageSize = "sm" | "md" | "lg";
 const SIZE_CLASS: Record<ProductImageSize, string> = {
   sm: "size-12 rounded-xl",
   md: "size-24 rounded-2xl",
-  lg: "aspect-square w-full rounded-none",
+  // Product cards need a fashion-editorial frame, not a rigid square tile.
+  // object-contain below ensures tall bottles and tubes never get clipped.
+  lg: "aspect-[4/5] w-full rounded-none",
 };
 
 const FALLBACK_SIZE: Record<ProductImageSize, "sm" | "md" | "lg"> = {
@@ -32,7 +34,11 @@ export function ProductImage({
   className?: string;
 }) {
   const sizeClass = SIZE_CLASS[size];
-  const [failed, setFailed] = React.useState(false);
+  const [pngFallbackFor, setPngFallbackFor] = React.useState<string | null>(null);
+  const [failedFor, setFailedFor] = React.useState<string | null>(null);
+  const isPngFallback = pngFallbackFor === imageUrl;
+  const source = isPngFallback ? imageUrl?.replace(/\.jpg$/, ".png") : imageUrl;
+  const failed = failedFor === imageUrl;
 
   const wrapper = cn(
     "flex shrink-0 items-center justify-center overflow-hidden bg-white p-3 ring-1 ring-border/70",
@@ -41,7 +47,7 @@ export function ProductImage({
   );
 
   // No usable image (missing, or the real one failed to load) → branded swatch.
-  if (!imageUrl || failed) {
+  if (!source || failed) {
     return (
       <div className={wrapper}>
         <ProductVisual
@@ -57,11 +63,20 @@ export function ProductImage({
     <div className={wrapper}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={imageUrl}
+        src={source}
         alt={name}
         className="h-full w-full object-contain"
         loading="lazy"
-        onError={() => setFailed(true)}
+        onError={() => {
+          // Farmasi's newer assets use JPG; part of the legacy catalogue is
+          // PNG. Try its twin URL before conceding that no official asset is
+          // available for this reference.
+          if (!isPngFallback && source && /content\.farmasius\.com\/Product\/\d+_400\.jpg$/.test(source)) {
+            setPngFallbackFor(imageUrl ?? null);
+            return;
+          }
+          setFailedFor(imageUrl ?? null);
+        }}
       />
     </div>
   );
