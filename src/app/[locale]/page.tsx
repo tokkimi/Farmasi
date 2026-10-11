@@ -99,11 +99,11 @@ export default async function Home({
         <Hero />
         <BeautyTryOnShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeBeautyProducts /></Suspense>
-        <ScanShowcase />
         <WellnessShowcase />
         <Suspense fallback={<div className="mx-auto h-80 max-w-6xl rounded-3xl" aria-busy="true" />}><HomeSkincareProducts /></Suspense>
         <AuditShowcase />
         <VideoGalleryPreview />
+        <ScanShowcase />
         <SubscriptionPreview />
         <FinalCta />
       </main>
