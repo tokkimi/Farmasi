@@ -49,6 +49,13 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 }
 
+function isNearBlack(hex: string) {
+  const value = hex.replace("#", "");
+  const n = parseInt(value.length === 3 ? value.split("").map((c) => c + c).join("") : value, 16);
+  const lightness = ((n >> 16) & 255) * 0.2126 + ((n >> 8) & 255) * 0.7152 + (n & 255) * 0.0722;
+  return lightness < 38;
+}
+
 function path(ctx: CanvasRenderingContext2D, pts: Point[]) {
   if (!pts.length) return;
   ctx.moveTo(pts[0].x, pts[0].y);
@@ -276,9 +283,12 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
       case "lipGloss":
       case "lipLiner": {
         if (area === "lipLiner") {
-          softFilter(ctx, 0.8);
-          ctx.strokeStyle = hexToRgba(shade.hex, 0.85 * intensity);
-          ctx.lineWidth = Math.max(1.2, faceWidth * 0.006) * scale;
+          // A liner should melt into the vermilion border, not trace a graphic
+          // marker line around the mouth.
+          softFilter(ctx, Math.max(1, faceWidth * 0.007));
+          ctx.globalCompositeOperation = "multiply";
+          ctx.strokeStyle = hexToRgba(shade.hex, 0.5 * intensity);
+          ctx.lineWidth = Math.max(1, faceWidth * 0.004) * scale;
           ctx.beginPath();
           path(ctx, LIPS_OUTER.map(P));
           ctx.stroke();
@@ -292,6 +302,17 @@ function drawLook(ctx: CanvasRenderingContext2D, lm: Point[], look: Look, intens
         lipGradient.addColorStop(0, hexToRgba(shade.hex, baseAlpha * 0.62));
         lipGradient.addColorStop(0.48, hexToRgba(shade.hex, baseAlpha));
         lipGradient.addColorStop(1, hexToRgba(shade.hex, baseAlpha * 0.74));
+        // First place a very faint, blurred bloom underneath; then keep the
+        // pigment inside the precise mesh outline. Together this reads as a
+        // naturally softened lip edge instead of a cut-out sticker.
+        ctx.save();
+        softFilter(ctx, Math.max(1, faceWidth * 0.008));
+        ctx.globalCompositeOperation = "multiply";
+        ctx.fillStyle = hexToRgba(shade.hex, baseAlpha * 0.14);
+        ctx.beginPath();
+        path(ctx, mouth);
+        ctx.fill();
+        ctx.restore();
         // Keep colour within the actual lip outline; a gradient over a clipped
         // organic shape reads as pigment, not as a flat, sticker-like fill.
         ctx.save();
@@ -426,10 +447,10 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
       const options = (delegate: "GPU" | "CPU") => ({
         baseOptions: { modelAssetPath: "/face-model/face_landmarker.task", delegate },
         runningMode: "VIDEO" as const,
-        numFaces: 2,
-        minFaceDetectionConfidence: 0.55,
-        minFacePresenceConfidence: 0.55,
-        minTrackingConfidence: 0.55,
+        numFaces: 1,
+        minFaceDetectionConfidence: 0.62,
+        minFacePresenceConfidence: 0.62,
+        minTrackingConfidence: 0.6,
       });
       try {
         landmarkerRef.current = (await FaceLandmarker.createFromOptions(vision, options("GPU"))) as unknown as VideoLandmarker;
@@ -461,7 +482,9 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             const result = landmarker.detectForVideo(currentVideo, performance.now());
             const faceCount = result.faceLandmarks?.length ?? 0;
             const raw = result.faceLandmarks?.[0] ?? null;
-            const next = raw ? smoothLandmarks(smoothedRef.current, raw, 0.55) : null;
+            // Give the current landmark more weight so lips, eyes and cheek
+            // placement follow small facial movements without visible lag.
+            const next = raw ? smoothLandmarks(smoothedRef.current, raw, 0.4) : null;
             smoothedRef.current = next;
             const preliminary = validateFacePosition(next, faceCount, stableSinceRef.current, time);
             if (preliminary.instruction !== "faceDetected") stableSinceRef.current = null;
@@ -765,6 +788,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
                 background: shade.palette
                   ? `conic-gradient(${shade.palette.map((c, i, arr) => `${c} ${(i / arr.length) * 100}% ${((i + 1) / arr.length) * 100}%`).join(", ")})`
                   : shade.hex,
+                boxShadow: (shade.palette ?? [shade.hex]).every(isNearBlack) ? "inset 0 0 0 1px rgba(255,255,255,0.72)" : undefined,
               }}
             />
           ))}
