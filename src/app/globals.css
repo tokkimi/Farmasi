@@ -164,3 +164,17 @@
 .farmasi-brand-loading i { position:absolute; top:-8px; left:-20%; width:28%; height:18px; background:radial-gradient(ellipse,rgba(255,255,255,.98),rgba(244,163,193,.72) 25%,transparent 70%); filter:blur(3px); animation:haru-load-beam 1.2s ease-in-out infinite; }
 .farmasi-logo { display:inline-block; color:#822342; font-family:var(--font-sans),sans-serif; font-size:1.15rem; font-weight:800; letter-spacing:.14em; line-height:1; }
 @media (prefers-reduced-motion:reduce) { .farmasi-brand-splash { animation:none; } .farmasi-brand-splash-mark,.farmasi-brand-splash-wordmark,.farmasi-brand-loading::before,.farmasi-brand-loading i,.farmasi-brand-splash::before { animation:none; } }
+
+/* Farmasi visual system: white field, graphite typography, understated silver. */
+.farmasi-public { --background:#fff; --foreground:#3f3f44; --primary:#54545a; --primary-foreground:#fff; --secondary:#f2f2f3; --muted:#f7f7f8; --muted-foreground:#74747a; --card:#fff; --border:rgba(46,46,51,.14); background:#fff; color:#3f3f44; }
+.farmasi-site-header { background:rgba(255,255,255,.92); border-bottom:1px solid rgba(46,46,51,.1); color:#45454a; backdrop-filter:blur(18px); }
+.farmasi-bottom-nav { background:rgba(255,255,255,.94); border:1px solid rgba(46,46,51,.13); color:#56565b; box-shadow:0 10px 30px rgba(45,45,50,.12); backdrop-filter:blur(18px); }
+.farmasi-tab-active { background:#ececef; color:#38383d; }
+.farmasi-logo { display:block; max-width:13rem; object-fit:contain; }
+.farmasi-brand-splash { background:#fff; }
+.farmasi-brand-splash::before,.farmasi-brand-splash .haru-brand-splash-glow { display:none; }
+.farmasi-brand-splash-logo { position:relative; width:min(72vw,32rem); height:auto; animation:haru-mark-arrive .7s cubic-bezier(.16,1,.3,1) both; }
+.farmasi-brand-loading { background:#ededee; box-shadow:none; }.farmasi-brand-loading::before { background:#55555b; }
+.farmasi-gate { display:grid; min-height:100svh; place-items:center; padding:1.5rem; background:linear-gradient(145deg,#fff,#f2f2f3); }.farmasi-gate-card { width:min(100%,29rem); border:1px solid #e1e1e3; border-radius:1.5rem; background:#fff; padding:2rem; text-align:center; box-shadow:0 24px 60px rgba(42,42,48,.1); }
+.farmasi-float-mark { border:1px solid rgba(255,255,255,.75); background:radial-gradient(circle at 32% 25%,#949499,#55555b 58%,#39393d); box-shadow:0 0 0 6px rgba(85,85,91,.08),0 0 26px rgba(90,90,98,.48),0 12px 30px rgba(30,30,35,.28); }
+.farmasi-public .haru-hero,.farmasi-public .haru-routines { background:#fff; }.farmasi-public .hero-editorial-shade { background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.9) 35%,rgba(255,255,255,.3) 100%); }.farmasi-public .hero-editorial-title,.farmasi-public .hero-kicker { color:#444449; }.farmasi-public .hero-editorial-title + p { color:#6c6c72!important; }.farmasi-public .hero-benefits { background:#f4f4f5; color:#47474c; }.farmasi-public .hero-benefit span,.farmasi-public .hero-benefit p { color:#77777d; }.farmasi-public .haru-cta { border-color:#56565b!important; background:#56565b!important; color:#fff!important; box-shadow:none!important; }.farmasi-public .haru-cta-secondary { background:#fff!important; color:#525257!important; }.farmasi-public .haru-site-header { background:#fff; }

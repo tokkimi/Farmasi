@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowDown, ScanFace, Sparkles } from "lucide-react";
+import { ScanFace, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 export function Hero() {
   const t = useTranslations("hero");
-  const ux = useTranslations("homeUx");
   const scan = useTranslations("faceScanPage");
 
   return (
@@ -22,7 +21,7 @@ export function Hero() {
             <p className="mt-5 max-w-md text-[.91rem] leading-6 text-[#e9e1dc]/78">{t("subtitle")}</p>
             <div className="mt-7 flex flex-wrap gap-2.5">
               <Link href="/app/face-scan" className="haru-cta haru-cta-compact"><ScanFace className="size-4" aria-hidden="true" />{scan("title")}</Link>
-              <Link href="/app/routines" className="haru-cta haru-cta-secondary haru-cta-compact">{ux("explore")}<ArrowDown className="size-3.5" aria-hidden="true" /></Link>
+              <Link href="/app/try-on" className="haru-cta haru-cta-secondary haru-cta-compact"><Sparkles className="size-3.5" aria-hidden="true" />Beauty VR</Link>
             </div>
             <p className="mt-4 text-[11px] leading-5 text-[#e9e1dc]/52">{t("disclaimer")}</p>
           </div>
