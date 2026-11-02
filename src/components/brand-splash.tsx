@@ -21,9 +21,9 @@ export function BrandSplash() {
   if (!visible) return null;
   return (
     <div className="farmasi-brand-splash" role="status" aria-label="Farmasi se prépare">
-      <div className="haru-brand-splash-glow" />
-      <div className="farmasi-brand-splash-mark" aria-hidden="true">F</div>
-      <div className="farmasi-brand-splash-wordmark"><strong>FARMASI</strong><span>BEAUTY INNOVATION</span></div>
+      {/* Official Farmasi wordmark supplied for this demo. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/farmasi-logo.png" alt="Farmasi" className="farmasi-brand-splash-logo" />
       <div className="farmasi-brand-loading" aria-hidden="true"><i /></div>
     </div>
   );
