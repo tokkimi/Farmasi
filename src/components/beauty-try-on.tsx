@@ -737,8 +737,8 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             </div>
           </div>
         )}
-        {active && (
-          <aside className="absolute bottom-3 right-3 z-20 flex w-40 gap-2 rounded-2xl border border-white/25 bg-black/55 p-2.5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:right-4" aria-label="Produit essayé">
+        {active && !photo && (
+          <aside className="absolute bottom-3 right-3 z-20 hidden w-40 gap-2 rounded-2xl border border-white/25 bg-black/55 p-2.5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:flex sm:right-4" aria-label="Produit essayé">
             <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
               {active.imageUrl && <img src={active.imageUrl} alt="" className="size-full object-contain" />}
             </div>
@@ -748,7 +748,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
       </div>
 
       {/* ── Bottom sheet: products & shades, applied instantly ── */}
-      <div className="shrink-0 rounded-t-[1.75rem] border-t border-white/15 bg-[#120f0e] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      {!photo && <div className="shrink-0 rounded-t-[1.75rem] border-t border-white/15 bg-[#120f0e] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         {active && (
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -803,6 +803,18 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
               </Link>
             </div>
           </div>
+        )}
+
+        {/* On small screens the product proposal sits in the sheet, never over
+            the face/camera controls. It stays directly above shade selection. */}
+        {active && (
+          <aside className="mt-3 flex items-center gap-2 rounded-2xl border border-white/15 bg-white/[0.07] p-2 sm:hidden" aria-label="Produit essayé">
+            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+              {active.imageUrl && <img src={active.imageUrl} alt="" className="size-full object-contain" />}
+            </div>
+            <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold">{active.name}</p><p className="truncate text-[10px] text-white/60">{activeShadeData?.name ?? t("pickShade")}</p></div>
+            <button type="button" onClick={() => cart.add({ id: active.slug, slug: active.slug, name: active.name, price: active.price, currency: active.currency, imageUrl: active.imageUrl })} className={cn("shrink-0 rounded-full px-3 py-2 text-[11px] font-bold", inCart ? "bg-[#8ed0aa] text-[#0b2516]" : "bg-[#f4c5d7] text-[#381520]")}>{inCart ? "Ajouté" : "Ajouter"}</button>
+          </aside>
         )}
 
         {/* Shades: tap = applied live on the face */}
@@ -881,7 +893,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             className="w-20 accent-[var(--primary)]"
           />
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
