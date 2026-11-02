@@ -9,6 +9,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { CookieBanner } from "@/components/cookie-banner";
 import { BrandSplash } from "@/components/brand-splash";
 import { FloatingScanner } from "@/components/floating-scanner";
+import { CartProvider } from "@/components/floating-cart";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 import "../haru-public.css";
@@ -54,7 +55,7 @@ export async function generateMetadata({
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
-      title: "Haru",
+      title: "Farmasi",
     },
     icons: {
       icon: [
@@ -103,6 +104,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col pb-24 font-sans">
         <NextIntlClientProvider>
           <AuthProvider>
+            <CartProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="light"
@@ -117,6 +119,7 @@ export default async function RootLayout({
               <BottomNav />
               <CookieBanner />
             </ThemeProvider>
+            </CartProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

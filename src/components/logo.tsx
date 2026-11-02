@@ -1,7 +1,6 @@
-/** The full Haru Skin logo lockup (monogram + wordmark). */
+/** Farmasi wordmark used consistently across the demo. */
 export function Logo({ className }: { className?: string }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src="/brand/haru-header-logo.png" alt="Haru Skin" className={className} />
+    <span aria-label="Farmasi" className={`farmasi-logo ${className ?? ""}`}>FARMASI</span>
   );
 }

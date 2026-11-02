@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCatalog, useShelf } from "@/lib/shelf-store";
 import { FARMASI_TRY_ON_PRODUCTS, type FarmasiProduct, type TryOnArea } from "@/lib/seed-data/farmasi-catalog";
 import { useBeautyFavorites } from "@/lib/beauty-favorites";
+import { useCart } from "@/components/floating-cart";
 import { FaceGuideOverlay } from "@/components/face-guide-overlay";
 import { smoothLandmarks, validateFacePosition } from "@/lib/face-mesh/faceMesh.utils";
 import type { FaceLandmarkPoint, FacePositionInstruction } from "@/lib/face-mesh/faceMesh.types";
@@ -33,6 +34,7 @@ const LEFT_BROW = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
 const RIGHT_BROW = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
 
 const AREA_ORDER: TryOnArea[] = ["complexion", "contour", "cheeks", "highlight", "eyeshadow", "eyeliner", "lashes", "brows", "lipLiner", "lips", "lipGloss"];
+const EXCLUSIVE_AREAS: TryOnArea[][] = [["lips", "lipGloss", "lipLiner"], ["eyeshadow", "eyeliner", "lashes", "brows"], ["complexion", "contour", "cheeks", "highlight"]];
 
 /** One product per face zone; lips/gloss/liner share the mouth but stack. */
 type Look = Partial<Record<TryOnArea, { slug: string; shade: number }>>;
@@ -402,6 +404,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
 
   const { catalog } = useCatalog();
   const { shelf, addProduct } = useShelf();
+  const cart = useCart();
   const favorites = useBeautyFavorites();
 
   React.useEffect(() => {
@@ -568,6 +571,7 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
   const activeShade = activePick?.slug === active?.slug ? activePick.shade : -1;
   const dbProduct = catalog.find((p) => p.slug === active?.slug);
   const inShelf = Boolean(dbProduct && shelf.some((p) => p.id === dbProduct.id));
+  const inCart = Boolean(active && cart.lines.some((line) => line.id === active.slug));
   const appliedCount = Object.keys(look).length;
   const aligned = faceFound && instruction === "faceDetected";
 
@@ -580,7 +584,14 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
         delete next[product.tryOn!];
         return next;
       }
-      return { ...prev, [product.tryOn!]: { slug: product.slug, shade } };
+      // A fresh colour always replaces the existing product in the same visual
+      // region. This avoids the accidental "stacked lipstick" / eye colours
+      // that make virtual try-on look like an overlay rather than makeup.
+      const next = { ...prev };
+      for (const group of EXCLUSIVE_AREAS) {
+        if (group.includes(product.tryOn!)) group.forEach((area) => delete next[area]);
+      }
+      return { ...next, [product.tryOn!]: { slug: product.slug, shade } };
     });
   };
 
@@ -726,6 +737,14 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
             </div>
           </div>
         )}
+        {active && (
+          <aside className="absolute bottom-3 right-3 z-20 flex w-40 gap-2 rounded-2xl border border-white/25 bg-black/55 p-2.5 shadow-2xl backdrop-blur-xl sm:bottom-4 sm:right-4" aria-label="Produit essayé">
+            <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+              {active.imageUrl && <img src={active.imageUrl} alt="" className="size-full object-contain" />}
+            </div>
+            <div className="min-w-0 flex-1"><p className="line-clamp-2 text-[11px] font-semibold leading-tight">{active.name}</p><p className="mt-1 text-[10px] text-white/65">{activeShadeData?.name ?? t("pickShade")}</p><button type="button" onClick={() => cart.add({ id: active.slug, slug: active.slug, name: active.name, price: active.price, currency: active.currency, imageUrl: active.imageUrl })} className={cn("mt-2 flex w-full items-center justify-center gap-1 rounded-full px-2 py-1.5 text-[10px] font-bold", inCart ? "bg-[#8ed0aa] text-[#0b2516]" : "bg-[#f4c5d7] text-[#381520]")}><ShoppingBag className="size-3" />{inCart ? "Ajouté" : "Ajouter"}</button></div>
+          </aside>
+        )}
       </div>
 
       {/* ── Bottom sheet: products & shades, applied instantly ── */}
@@ -760,6 +779,21 @@ export function BeautyTryOn({ initialSlug, initialLook }: { initialSlug?: string
                   {inShelf ? <Check className="size-4" /> : <Plus className="size-4" />}
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => cart.add({
+                  id: active.slug,
+                  slug: active.slug,
+                  name: active.name,
+                  price: active.price,
+                  currency: active.currency,
+                  imageUrl: active.imageUrl,
+                })}
+                className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-white/10"
+                aria-label="Ajouter au panier"
+              >
+                <ShoppingBag className="size-4" />
+              </button>
               <Link
                 href={`/app/product/${active.slug}`}
                 aria-label={t("productSheet")}

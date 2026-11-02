@@ -41,6 +41,7 @@ import { ProductImage } from "@/components/product-image";
 import { FaceGuideOverlay } from "@/components/face-guide-overlay";
 import { FaceMeshOverlay } from "@/components/face-mesh-overlay";
 import { FaceScanMarkerOverlay } from "@/components/face-scan-marker-overlay";
+import { useCart } from "@/components/floating-cart";
 import { FaceScanCapture } from "@/components/face-scan-capture";
 import { Logo } from "@/components/logo";
 import { SkinScoreRing, ModuleScoreBar } from "@/components/skin-score";
@@ -162,6 +163,7 @@ export function FaceScanClient() {
 
   const { catalog } = useCatalog();
   const { addProduct } = useShelf();
+  const cart = useCart();
 
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [stepIndex, setStepIndex] = React.useState(0);
@@ -840,6 +842,7 @@ export function FaceScanClient() {
                   addedProducts={addedProducts}
                   onAddProduct={(product) => {
                     addProduct(product);
+                    cart.add(product);
                     setAddedProducts((prev) => new Set(prev).add(product.id));
                   }}
                 />
@@ -995,6 +998,17 @@ function ModuleDetail({
       </div>
 
       <div className="flex flex-col gap-5">
+        {module.flagged && products[0] && (() => {
+          const product = products[0];
+          const isAdded = addedProducts.has(product.id);
+          return <div className="flex items-center gap-3 rounded-2xl border border-primary/35 bg-primary/10 p-3 shadow-[0_12px_28px_-20px_rgba(0,0,0,.6)]">
+            <ProductImage imageUrl={product.imageUrl} category={product.category} name={product.name} size="sm" />
+            <div className="min-w-0 flex-1"><p className="text-[10px] font-semibold uppercase tracking-wide text-primary">Soin recommandé</p><p className="truncate text-sm font-semibold">{product.name}</p><p className="truncate text-xs text-muted-foreground">{tCategories(product.category)}</p></div>
+            <button type="button" onClick={() => onAddProduct(product)} aria-label={isAdded ? t("addedProduct") : t("addProduct")} className={cn("flex size-9 shrink-0 items-center justify-center rounded-full", isAdded ? "bg-success text-foreground" : "bg-primary text-primary-foreground")}>
+              {isAdded ? <Check className="size-4" /> : <ClipboardCheck className="size-4" />}
+            </button>
+          </div>;
+        })()}
         <div className="grid gap-4 sm:grid-cols-2">
           <InfoList title={t("causesLabel")} items={t.raw(`modules.${module.id}.causes`) as string[]} />
           <InfoList title={t("tipsLabel")} items={t.raw(`modules.${module.id}.tips`) as string[]} />
