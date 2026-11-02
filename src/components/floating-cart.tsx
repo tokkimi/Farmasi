@@ -78,7 +78,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           <div className="border-t border-white/10 bg-white/[.04] p-4"><div className="mb-3 flex items-center justify-between text-sm"><span className="text-white/65">Total estimé</span><strong>{price(total)}</strong></div><button type="button" onClick={() => setOpen(false)} className="w-full rounded-full bg-[#f4c5d7] px-4 py-3 text-sm font-bold text-[#381520]">Continuer mes achats</button></div>
         </>}
       </div>}
-      <button type="button" onClick={() => setOpen((value) => !value)} className="farmasi-float-mark relative flex size-14 items-center justify-center rounded-full text-xl font-serif font-semibold text-white transition hover:scale-105" aria-label="Ouvrir ma sélection Farmasi" aria-expanded={open}>F{count > 0 && <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-[#4d4d53] text-[11px] font-bold text-white ring-2 ring-white">{count}</span>}</button>
+      <button type="button" onClick={() => setOpen((value) => !value)} className="farmasi-float-mark relative flex size-14 items-center justify-center rounded-full transition hover:scale-105" aria-label="Ouvrir ma sélection Farmasi" aria-expanded={open}><img src="/farmasi-logo.png" alt="" className="w-8 object-contain brightness-0 invert" />{count > 0 && <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-[#4d4d53] text-[11px] font-bold text-white ring-2 ring-white">{count}</span>}</button>
     </div>
   </CartContext.Provider>;
 }

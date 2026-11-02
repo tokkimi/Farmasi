@@ -173,7 +173,7 @@
 .farmasi-logo { display:block; max-width:13rem; object-fit:contain; }
 .farmasi-brand-splash { background:#fff; }
 .farmasi-brand-splash::before,.farmasi-brand-splash .haru-brand-splash-glow { display:none; }
-.farmasi-brand-splash-logo { position:relative; width:min(72vw,32rem); height:auto; animation:haru-mark-arrive .7s cubic-bezier(.16,1,.3,1) both; }
+.farmasi-brand-splash-logo { position:relative; display:block; width:min(58vw,18rem); max-height:3.5rem; height:auto; object-fit:contain; object-position:center; animation:haru-mark-arrive .7s cubic-bezier(.16,1,.3,1) both; }
 .farmasi-brand-loading { background:#ededee; box-shadow:none; }.farmasi-brand-loading::before { background:#55555b; }
 .farmasi-gate { display:grid; min-height:100svh; place-items:center; padding:1.5rem; background:linear-gradient(145deg,#fff,#f2f2f3); }.farmasi-gate-card { width:min(100%,29rem); border:1px solid #e1e1e3; border-radius:1.5rem; background:#fff; padding:2rem; text-align:center; box-shadow:0 24px 60px rgba(42,42,48,.1); }
 .farmasi-float-mark { border:1px solid rgba(255,255,255,.75); background:radial-gradient(circle at 32% 25%,#949499,#55555b 58%,#39393d); box-shadow:0 0 0 6px rgba(85,85,91,.08),0 0 26px rgba(90,90,98,.48),0 12px 30px rgba(30,30,35,.28); }

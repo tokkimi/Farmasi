@@ -188,17 +188,9 @@ export async function POST(request: Request) {
   }
 
   const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, role: true, subscriptionStatus: true, faceScanCredits: true },
-  });
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  // The protected Farmasi demo has its own consent gate. Guest scans are
+  // intentionally not persisted; signed-in users keep scan history.
+  const user = session?.user?.id ? await db.user.findUnique({ where: { id: session.user.id }, select: { id: true } }) : null;
 
   if (!isVisionConfigured()) {
     return NextResponse.json({ error: "vision_not_configured" }, { status: 501 });
@@ -293,21 +285,8 @@ export async function POST(request: Request) {
 
     // Grab the most recent earlier scan BEFORE saving this one, so the result
     // can show an honest same-person before/after comparison.
-    const priorScan = await db.faceScanResult.findFirst({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true, overallScore: true, analysis: true },
-    });
-
-    await db.faceScanResult.create({
-      data: {
-        userId: user.id,
-        overallScore: analysis.overallScore,
-        skinType: analysis.skinType,
-        summary: analysis.summary,
-        analysis,
-      },
-    });
+    const priorScan = user ? await db.faceScanResult.findFirst({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, select: { createdAt: true, overallScore: true, analysis: true } }) : null;
+    if (user) await db.faceScanResult.create({ data: { userId: user.id, overallScore: analysis.overallScore, skinType: analysis.skinType, summary: analysis.summary, analysis } });
 
     let previous: {
       createdAt: string;
