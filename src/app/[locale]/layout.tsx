@@ -8,7 +8,6 @@ import { AuthProvider } from "@/components/auth-provider";
 import { BottomNav } from "@/components/bottom-nav";
 import { CookieBanner } from "@/components/cookie-banner";
 import { BrandSplash } from "@/components/brand-splash";
-import { FloatingScanner } from "@/components/floating-scanner";
 import { CartProvider } from "@/components/floating-cart";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
@@ -115,7 +114,6 @@ export default async function RootLayout({
             >
               <BrandSplash />
               {children}
-              <FloatingScanner />
               <BottomNav />
               <CookieBanner />
             </ThemeProvider>
